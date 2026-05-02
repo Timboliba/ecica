@@ -1,0 +1,89 @@
+extends ./layout.pug
+
+block content
+    // 🔹 Leaflet CSS
+    link(rel="stylesheet", href="https://unpkg.com/leaflet/dist/leaflet.css")
+
+    .contact-containers
+        h2 Contactez Nous
+
+        .contact-title
+            p Contactez nous
+
+        .contact-and-address-container
+            .address-container
+                h3 Localisation de l'E.C.I.C.A
+                .map-container(style="height:470px; width:100%; border-radius:12px;")
+
+            .contact-container
+                h3 Contact 
+                .contact-card
+                    .contact-item 
+                        p.contact-item-icon 📍
+                        p.contact-info
+                            span.title Adresse Postal: 
+                            span.info BP:1828     
+
+                    .contact-item 
+                        p.contact-item-icon 📞
+                        p.contact-info
+                            span.title Fax: 
+                            span.info 20 22 26 91     
+
+                    .contact-item 
+                        p.contact-item-icon ☎️
+                        p.contact-info
+                            span.title Secrétariat Général: 
+                            span.info 20 22 26 91     
+
+                    .contact-item 
+                        p.contact-item-icon ✉️
+                        p.contact-info
+                            span.title Adresse E-mail: 
+                            span.info contact@email.com     
+
+        .contact-form
+            h2 Envoyer un message 
+            form(action="")
+                .fullname-and-email 
+                    div(class="input-group")
+                        label(for="full-name") Nom complet 
+                            span *
+                        input(type="text" name="fullname" id="fullname" placeholder="Votre nom")
+                    div(class="input-group")
+                        label(for="email") Email 
+                            span *
+                        input(type="email" name="email" id="email" placeholder="email@exempe.com")
+                
+                div(class="input-group")
+                    label(for="full-name") Sujet 
+                        span *
+                    input(type="text" name="sujet" id="sujet" placeholder="Objet de votre message")
+                
+                div(class="input-group")
+                    label(for="full-name") Message 
+                        span *
+                    textarea(name="message", cols="30", rows="10") Votre message... 
+                div(class="input-group")
+                    input(type="submit", value="Envoyer le message")
+
+    // 🔹 Leaflet JS
+    script(src="https://unpkg.com/leaflet/dist/leaflet.js")
+
+    // 🔥 Script carte
+    script.
+        const map = L.map(document.querySelector('.map-container')).setView([12.63, -8], 12,"center");
+
+        // 🔹 Style de carte (propre)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // 🔥 Points (adresse)
+        const locations = [
+            { lat: 12.6549, lng:  -7.9965, name: "ECICA" },
+        ];
+
+        locations.forEach(loc => {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup(loc.name);
+        });

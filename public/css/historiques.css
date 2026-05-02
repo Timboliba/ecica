@@ -1,0 +1,106 @@
+.historique-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5em;
+  height: max-content;
+  padding: 1.5em 1em;
+
+  .directeur-actuel,
+  .directeur-des-etudes,
+  .surveillant,
+  .chef-des-travaux,
+  .econome,
+  .old-director {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    text-align: center;
+  }
+
+  .photo {
+    img {
+      height: 100px;
+      width: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .teams-container,
+  .les-enciens-directeur {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1em;
+  }
+}
+
+/* 📱 Mobile (petits écrans) */
+@media (max-width: 600px) {
+  .historique-container {
+    gap: 2em;
+
+    .teams-container,
+    .les-enciens-directeur {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .photo img {
+      height: 80px;
+      width: 80px;
+    }
+  }
+}
+
+/* 📲 Tablette */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .historique-container {
+    .teams-container,
+    .les-enciens-directeur {
+      justify-content: center;
+    }
+
+    .directeur-actuel,
+    .directeur-des-etudes,
+    .surveillant,
+    .chef-des-travaux,
+    .econome,
+    .old-director {
+      width: 45%;
+    }
+  }
+}
+
+/* 💻 Desktop large */
+@media (min-width: 1025px) {
+  .historique-container {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .directeur-des-etudes,
+    .surveillant,
+    .chef-des-travaux,
+    .econome,
+    .old-director {
+      width: 18%;
+    }
+  }
+}
+
+.directeur-actuel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}

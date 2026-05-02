@@ -1,0 +1,53 @@
+div(class="nav-and-header")
+    
+    div(class="hamburger" id="hamburger")
+        span
+        span
+        span
+
+    nav(id="nav")
+        ul
+            li(class="dropdown-menu home" id="dropdown-menu_home")
+                a(href="/" class="link-menu")
+                    img(src="/img/home.svg", alt="home", class="icon_home")
+
+            li(class="dropdown-menu")
+                a(href="#" class="link-menu") Présentation
+                ul(class="dropdown-submenu")
+                    li
+                        a(href="/presentation/MotDirecteur") Mot du directeur
+                        a(href="/presentation/Presentation") Présentation
+                        a(href="/presentation/Administration") Administration
+                        a(href="/presentation/lois") Lois et Réglements
+                        a(href="/presentation/historique") Historique
+
+            li(class="dropdown-menu")
+                a(href="#" class="link-menu") Formations
+                ul(class="dropdown-submenu")
+                    li
+                        a(href="/") Rapport d'Activités Annuel
+                        a(href="/Formation/SystemeEducatif") Système Educatif
+                        //- a(href="/") Formations Continues
+                        a(href="/") E-Learning
+
+            li(class="dropdown-menu")
+                a(href="#" class="link-menu") Votre Espace
+                ul(class="dropdown-submenu")
+                    li
+                        a(href="/student") Espace Etudiant
+                        a(href="/teacher") Espace Enseignant
+                        a(href="/") Espace Moodle
+
+            li(class="dropdown-menu")
+                a(href="#" class="link-menu") Accès Directs
+                ul(class="dropdown-submenu")
+                    li
+                        a(href="#") Plateforme E-Learning
+                        a(href="#") Bibliothèque
+                        a(href="#") Insertion Professionnelle
+
+            li(class="dropdown-menu")
+                a(href="/contact" class="link-menu") Contact
+                
+            li(class="dropdown-menu")
+                a(href="/Liens" class="link-menu") Liens Utiles

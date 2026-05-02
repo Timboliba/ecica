@@ -1,0 +1,54 @@
+extends ./layout.pug
+block content
+    .presentation-space 
+        h2(class="bigTittle")  Présentation 
+        article
+            .text
+                p
+                    span.dropcap L'
+                    |  Ecole Centrale pour l'Industrie, le Commerce et l'Administration. Créée le 29 octobre 1969, elle est située dans la même enceinte que le Lycée Technique (ex-Collège Technique de Bamako), limitée à l'Est par le quartier Médina-Coura, à l'Ouest par le stade Ouezzin Coulibaly, au Nord par le lycée BA Aminata Diallo et au Sud par l'État-Major de l'Armée de terre.
+
+                p
+                | L'Ecole Centrale pour l'Industrie, le Commerce et l'Administration est un établissement d’enseignement secondaire technique et professionnel à accès ouvert. 
+                | L’accès est réservé aux élèves titulaires du D.E.F (équivalent du B.E.P.C) de l'année en cours. 
+                | Le concours professionnel est réservé aux titulaires du C.A.P ou d’un diplôme équivalent avec 3 ans d’expérience.
+
+                p
+                | Deux systèmes d'enseignement coexistent :
+                ul
+                li Le système classique
+                li Le système modulaire
+
+                p
+                | Le diplôme délivré est le Brevet de Technicien (B.T) :
+                ul
+                li Première partie en fin de 3ème année
+                li Deuxième partie en fin de 4ème année
+                li (Système modulaire : validation des modules)
+
+                p
+                | Après trois années d’expérience, les diplômés peuvent accéder à :
+                ul
+                li FSJE (Faculté des Sciences Juridiques et Économiques)
+                li FLASH
+                li IUG
+                li ENI
+                li FAST
+                -const filieres =["CHIMIE INDUSTRIELLE","MAINTENANCE INDUSTRIELLE","ELECTROMECANIQUE","GEOLOGIE","TOPOGRAPHIE","TRAVAUX PUBLICS","DESSIN BATIMENT","HYDRAULIQUE","BATIMENT","FROID / CLIMATISATION","ELECTRONIQUE","CONSTRUCTION METALLIQUE","ADMINISTRATION"]
+                ul.filieres
+                    each filiere in filieres
+                                li= filiere
+                    
+                       
+
+                .debouche-container
+                    h4 E.C.I.C.A en chiffres
+                    p Quelques informations clés :
+                    ul
+                        li 29 Octobre 1969 : date de création
+                        li Effectif global : 4751
+                        li Enseignants : 258
+                        li Nouveaux inscrits en 2025/2026: 1200
+                        li Nombre de laboratoire : 2
+                        li Nombre d'attelier : 2
+                        li Superficie : 2ha
