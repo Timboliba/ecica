@@ -1,9 +1,52 @@
-extends layout 
+﻿extends layout
 
-block content 
-    div(class="systeme-educatif-container")
-        h2(class="bigTittle") Système Pédagogique
-        div(class="span12")
-            div(class="text")
-                p(class="justify-content")
-                    | Le système pédagogique mis en place à l'E.C.I.C.A est fondé sur trois niveaux de formation menant chacun à l’un des diplômes suivants :
+block content
+    section.systeme-educatif-container
+        .edu-hero
+            p.edu-kicker E.C.I.C.A
+            h1.bigTittle Système pédagogique
+            p.edu-lead
+                | Le dispositif pédagogique de l'E.C.I.C.A est structuré pour accompagner chaque apprenant
+                |  vers une insertion professionnelle solide, grâce à une formation progressive, pratique et exigeante.
+
+        .edu-grid
+            article.edu-card
+                h3 Les niveaux de formation
+                p
+                    | Le parcours de formation est organisé en trois niveaux complémentaires,
+                    |  permettant une montée en compétence continue.
+                ul.edu-list
+                    li BT (Brevet de Technicien)
+                    li Bac Professionnel
+                    li BTS (Brevet de Technicien Supérieur)
+
+            article.edu-card
+                h3 Approche pédagogique
+                p
+                    | L'enseignement combine théorie, travaux dirigés, ateliers techniques et évaluations régulières
+                    |  afin de garantir l'acquisition des compétences clés.
+                ul.edu-list
+                    li Cours structurés par modules
+                    li Travaux pratiques en situation réelle
+                    li Suivi individualisé des apprenants
+
+            article.edu-card
+                h3 Objectifs de la formation
+                p
+                    | Le programme vise à former des techniciens compétents, responsables et immédiatement opérationnels
+                    |  dans le monde professionnel.
+                ul.edu-list
+                    li Maîtrise des fondamentaux techniques
+                    li Développement de l'autonomie et de la rigueur
+                    li Préparation à l'emploi et à la poursuite d'études
+
+        section.edu-highlight
+            h3 Débouchés et opportunités
+            p
+                | À la fin du cursus, les diplômés peuvent intégrer le marché du travail,
+                |  entreprendre dans leur domaine ou poursuivre des études supérieures selon leur projet.
+            .edu-tags
+                span Insertion professionnelle
+                span Stages qualifiants
+                span Poursuite d'études
+                span Entrepreneuriat
