@@ -53,10 +53,11 @@
 
 // IMAGES
 const imgs = [
-  "/img/first.png",
-  "/img/imgi_3_2026-03-13-01-50-18_e1f2b357db0f8a24e0865b5e9f096589d1b06de9.png",
-  "/img/imgi_4_2026-03-10-12-34-13_44137027455037663c328af634c83ea4d25a70f1.png",
-  "/img/imgi_5_2025-10-04-12-35-46_8beb0a304eef6eb40e20d7f07f175f75d2399499.png",
+  "/img/picture1.png",
+  "/img/picture2.png",
+  "/img/picture3.png",
+  "/img/picture4.png",
+  "/img/picture5.png",
 ];
 
 // ELEMENTS
