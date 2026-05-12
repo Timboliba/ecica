@@ -1,0 +1,202 @@
+extends ./layout.pug
+
+block content
+    section.emplois-page
+        h2.bigTittle Liste des emplois du temps
+
+        if emploisFiles && emploisFiles.length
+            .files-list
+                each file in emploisFiles
+                    article.file-card
+                        h3.file-title= file.name
+
+                        if file.isPdf
+                            iframe.file-preview(src=file.url title=`Apercu ${file.name}`)
+                        else if file.isImage
+                            img.file-preview-image(src=file.url alt=`Apercu ${file.name}`)
+                        else if file.isExcel
+                            .excel-preview(data-excel-url=file.url)
+                                p.loading-excel Chargement de l'apercu Excel...
+                        else
+                            p.no-preview Apercu non disponible pour ce type de fichier.
+
+                        a.download-link(href=file.url download=file.name) Telecharger
+        else
+            p.empty-state Aucun fichier trouve dans public/emplois.
+
+    script(src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js")
+    script.
+        (function () {
+            const previewBlocks = document.querySelectorAll(".excel-preview");
+            if (!previewBlocks.length || typeof XLSX === "undefined") return;
+
+            function renderRows(rows) {
+                const wrap = document.createElement("div");
+                wrap.className = "table-wrap";
+                const table = document.createElement("table");
+                table.className = "excel-table";
+
+                if (!rows.length) {
+                    const empty = document.createElement("p");
+                    empty.className = "no-preview";
+                    empty.textContent = "Feuille vide.";
+                    return empty;
+                }
+
+                const maxCols = rows.reduce(function (m, row) {
+                    return Math.max(m, row.length);
+                }, 0);
+                const thead = document.createElement("thead");
+                const tbody = document.createElement("tbody");
+
+                rows.forEach(function (row, rowIndex) {
+                    const tr = document.createElement("tr");
+                    for (let colIndex = 0; colIndex < maxCols; colIndex += 1) {
+                        const value = row[colIndex] == null ? "" : String(row[colIndex]);
+                        const cell = document.createElement(rowIndex === 0 ? "th" : "td");
+                        cell.textContent = value;
+                        tr.appendChild(cell);
+                    }
+                    if (rowIndex === 0) thead.appendChild(tr);
+                    else tbody.appendChild(tr);
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                wrap.appendChild(table);
+                return wrap;
+            }
+
+            previewBlocks.forEach(function (block) {
+                const excelUrl = block.dataset.excelUrl;
+                fetch(excelUrl)
+                    .then(function (response) {
+                        if (!response.ok) throw new Error("Erreur HTTP " + response.status);
+                        return response.arrayBuffer();
+                    })
+                    .then(function (buffer) {
+                        const workbook = XLSX.read(buffer, { type: "array" });
+                        block.innerHTML = "";
+
+                        workbook.SheetNames.forEach(function (sheetName) {
+                            const title = document.createElement("h4");
+                            title.className = "sheet-title";
+                            title.textContent = sheetName;
+                            block.appendChild(title);
+
+                            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+                                header: 1,
+                                raw: false,
+                                defval: ""
+                            });
+                            block.appendChild(renderRows(rows));
+                        });
+                    })
+                    .catch(function () {
+                        block.innerHTML = "<p class=\"no-preview\">Impossible d'afficher ce fichier Excel.</p>";
+                    });
+            });
+        })();
+
+    style.
+        .emplois-page {
+            padding: 1rem;
+            max-width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        .files-list {
+            display: grid;
+            gap: 1rem;
+            max-width: 100%;
+        }
+        .file-card {
+            border: 1px solid #d6d6d6;
+            border-radius: 8px;
+            padding: 0.85rem;
+            background: #fff;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .file-title {
+            margin: 0 0 0.6rem;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+        .file-preview {
+            width: 100%;
+            height: min(80vh, 900px);
+            border: 1px solid #ccc;
+            background: #f6f6f6;
+            display: block;
+            box-sizing: border-box;
+        }
+        .file-preview-image {
+            width: 100%;
+            max-height: min(80vh, 900px);
+            object-fit: contain;
+            border: 1px solid #ccc;
+            background: #f6f6f6;
+            display: block;
+            box-sizing: border-box;
+        }
+        .loading-excel {
+            margin: 0;
+            color: #555;
+        }
+        .sheet-title {
+            margin: 0.8rem 0 0.45rem;
+            font-size: 0.95rem;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #ddd;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        .excel-table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+            background: #fff;
+            table-layout: auto;
+        }
+        .excel-table th,
+        .excel-table td {
+            border: 1px solid #222;
+            padding: 0.3rem 0.45rem;
+            text-align: center;
+            font-size: 0.78rem;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+        .excel-table th {
+            background: #f1f1f1;
+            font-weight: 700;
+        }
+        .no-preview {
+            margin: 0 0 0.8rem;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid #0a4c94;
+            color: #0a4c94;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .download-link:hover {
+            background: #0a4c94;
+            color: #fff;
+        }
+        .empty-state {
+            color: #666;
+            font-size: 0.95rem;
+        }
