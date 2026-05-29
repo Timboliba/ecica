@@ -1,107 +1,88 @@
 extends layout
-block content
-        div(class="home-container")
-                div(class="acces-direct-container")
-                        h2 Accès Directs 
-                        div(class="acces-cards")
-                                                
-                                div(class="acces-item")
-                                        h1 
-                                                a(href="/Emplois" class="link-menu")
-                                                        img(src="/img/emploi_du_temps.jpg" alt="picture-emploi-du-temps-03")  
-                                                        b Emplois Du temps
-                                        p(class="details")
-                                                span 18 mars 2026 | 
-                                                a(href='#') Etudiants
-                                div(class="acces-item")
-                                        h1 
-                                                a(href="/img/first.png")
-                                                        img(src="/img/first.png" alt="picture-emploi-du-temps-01") 
-                                                        b Emplois Du temps Master S2
-                                        p(class="details")
-                                                span 18 mars 2026 | 
-                                                a(href='#') Etudiants
-                        
-                                div(class="acces-item")
-                                        h1 
-                                                a(href="/img/first.png")
-                                                        img(src="/img/first.png" alt="picture-emploi-du-temps-02")  
-                                                        b Emplois Du temps Master S2
-                                        p(class="details")
-                                                span 18 mars 2026 | 
-                                                a(href='#') Etudiants
-                                                
-                                div(class="acces-item")
-                                        h1 
-                                                a(href="/img/first.png")
-                                                        img(src="/img/first.png" alt="picture-emploi-du-temps-04")  
-                                                        b Emplois Du temps Master S2
-                                        p(class="details")
-                                                span 18 mars 2026 | 
-                                                a(href='#') Etudiants
-                div(class="a-l-a-une-container")
-                        div(class="posts")
-                                div(class="carousel-imgs_acces-directs")
-                                        div(class="carousel-imgs")
-                                                h2 A la une 
-                                                div(class="carousel")
-                                                        article
-                                                                img(src="/img/picture4.png", alt="emploi-du-temps", srcset="" class="article_imgs")
-                                                        div(class="carousel-controle")
-                                                                div(class="prev")
-                                                                div(class="next")
-                                        div(class="acces-directs")
-                                                h2 Accès Directs
-                                                div(class="acces-directs-items")
-                                                        a(href="#")
-                                                                img(src="/img/Emploi_du__temps.png" alt='acces-rapide') 
-                                                        div(class="acces-direct-links")
-                                                                a(href="#" class="these-post")
-                                                                        h5 Thèses Soutenues
-                                                                        span Toutes les thèses soutenues à la FSDM 
-                                                                a(href="#" class="article-post")
-                                                                        h5 Thèses Soutenues
-                                                                        span Toutes les thèses soutenues à la FSDM               
-                                
-                                div(class="about-school-section" style="display: flex; flex-direction: column; gap: 1em;")
-                                        h2 À propos de l'E.C.I.C.A
-                                        div(class="about-school-description" style="display: flex; flex-direction: column; gap: 1em; text-align: justify;")
-                                                p L'École Centrale pour l'Industrie, le Commerce et l'Administration (E.C.I.C.A) est une institution de référence historique, pionnière dans la formation professionnelle d'excellence. Depuis sa création, elle s'est imposée comme un véritable creuset de talents, formant des générations de cadres, de techniciens et d'entrepreneurs qui contribuent activement au développement socio-économique de la nation.
-                                                p Animée par des valeurs fondamentales de rigueur, d'intégrité et d'innovation, notre école offre une approche pédagogique pluridisciplinaire de haut niveau. Nous proposons des programmes sur mesure, couvrant de manière exhaustive aussi bien les filières industrielles que les domaines stratégiques du commerce et de l'administration. Cette synergie unique garantit à nos étudiants une polyvalence et une adaptabilité très recherchées par les entreprises d'aujourd'hui.
-                                                p En s'appuyant sur un corps professoral d'experts, des infrastructures en constante modernisation (laboratoires, ateliers de pointe) et un vaste réseau de partenaires institutionnels et corporatifs, l'E.C.I.C.A offre bien plus qu'un simple diplôme. Elle forge des professionnels aguerris, prêts à relever les défis complexes du marché de l'emploi mondial avec assurance et leadership.
-                                div(class="guide-actualiser")
-                                        .guide-actualiser-header 
-                                                h2 Guide de l'étudiant
-                                                span(class="title") "Retrouvez toutes les informations essentielles pour réussir votre parcours à l'E.C.I.C.A"
-                                        a(href="#" class="guide-actualiser-img")
-                                                img(src="/img/IMG_0288.jpeg", alt="guide-actualite")
-                                .static-container 
-                                        .chiffer-container
-                                                h3 E.C.I.C.A en chiffres
-                                                div(class="chiffre-datas")
-                                                        .chiffre-item 
-                                                                div(class="data") 
-                                                                       span 259
-                                                                div(class="title") Profeseur      
-                                                        .chiffre-item 
-                                                                div(class="data") 
-                                                                       span 4751
-                                                                div(class="title") Etudiants 
-                                                        .chiffre-item 
-                                                                div(class="data") 
-                                                                        span 258
-                                                                div(class="title") Etudiants Internationnaux 
-                                                                
-                                                        .chiffre-item 
-                                                                div(class="data") 
-                                                                       span 3000
-                                                                div(class="title") Diplomés
-                                        .mission-container
-                                                h3 Notre missions
-                                                .mission-description 
-                                                        p L’ECICA doit promouvoir une formation professionnelle d’excellence, en dotant ses élèves de compétences adaptées au monde professionnel et aux exigences du marché du travail, afin de former de futurs techniciens qualifiés.
 
-                                                .date-container 
-                                                        h4 Création 
-                                                        span 1969
-                        aside(class="post-events") Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit quas minus vero nulla labore cum, voluptatem, doloremque corrupti fugit deleniti expedita qui asperiores nemo quo iure dolores consectetur. Quo, earum?Rerum sunt, adipisci sint repellat exercitationem assumenda obcaecati similique perspiciatis voluptates, fugit animi! Et numquam sit totam saepe adipisci, rerum dolor id itaque ipsum rem blanditiis perspiciatis temporibus culpa nobis.Inventore ducimus possimus sit maiores provident quaerat consequuntur laboriosam, neque nihil quis dolorem aspernatur odit molestiae modi itaque? Voluptate error consequatur sunt ullam voluptatum, esse labore soluta suscipit nostrum modi?Asperiores doloremque quae cum beatae, non sunt atque inventore animi quaerat molestiae recusandae eius architecto quisquam quidem delectus. Dolore ab, necessitatibus omnis maxime reiciendis aliquid repellat repellendus vel perspiciatis explicabo.Architecto repudiandae quis accusantium voluptatem distinctio laudantium a nesciunt error, nihil, asperiores in dolorum iste inventore laboriosam sapiente animi tempora dolores voluptas necessitatibus nulla quia deserunt ea? Est, voluptatibus quos?Libero sequi eaque quo ipsum. Aliquid, non reprehenderit? Possimus fugit eum pariatur tempora nemo! Quod eum rem cumque! Cum exercitationem rerum consequuntur nihil perferendis magni veniam animi iure assumenda quam.Necessitatibus aliquid quod tempore, inventore veniam temporibus esse aperiam sint delectus quam quos maxime reprehenderit, eos obcaecati, odit molestiae illum? Sint, similique dolorem beatae sed quas fuga nobis perspiciatis quisquam?Id impedit mollitia nobis distinctio eveniet et repellat maiores sunt minus accusantium necessitatibus hic molestias consequatur quos libero nemo est harum, praesentium, voluptatibus saepe rem laudantium dolorum. Quo, dolor voluptas?Pariatur sunt ratione aut quae repudiandae fugit facere cupiditate dolore accusamus, ipsum, at distinctio voluptates. Laborum unde veniam eveniet odio accusantium eaque earum nam laboriosam, ipsum, quis in omnis autem?Alias culpa ducimus modi? Hic maiores ad, natus at officia excepturi id est quasi ducimus cupiditate similique adipisci! Esse aliquid quae adipisci nobis veniam quia labore soluta? Ipsa, inventore maiores.Laborum beatae inventore officia expedita, ab explicabo veniam, odio ex soluta, culpa officiis alias odit iure distinctio harum sed. Nobis minus aliquid vel, quos corrupti aspernatur ipsam unde. Deleniti, pariatur!Voluptas quibusdam sint repellendus natus odit eius voluptatem, id dolor earum neque obcaecati qui. Quaerat accusantium iure harum architecto natus? Doloribus sed quisquam dolorem sit doloremque enim expedita eos reprehenderit!Labore aut illum omnis error rerum consequuntur in doloribus, quibusdam quod ullam excepturi! Eligendi eaque mollitia ipsa accusamus voluptas sit ullam. Quis est praesentium incidunt, dicta repellendus voluptatem nesciunt maiores?Sit ut eaque necessitatibus voluptas architecto labore ipsum minus. Ea asperiores non ipsum similique eius soluta voluptas debitis repellat, quaerat corporis eaque voluptatibus odio! Maxime quisquam dignissimos aspernatur ab dolorum!Obcaecati tenetur perspiciatis tempora. Voluptatum fugiat excepturi sint adipisci odio repellendus deleniti architecto sapiente atque itaque ipsa cum, et, amet est voluptates quidem aliquid doloremque esse totam iusto possimus cupiditate.
+block content
+  .home-container
+    section.home-hero
+      .home-hero__media
+        img(src="/img/picture4.png", alt="Étudiants de l'E.C.I.C.A")
+      .home-hero__content
+        span.home-kicker École Centrale pour l'Industrie, le Commerce et l'Administration
+        h1 E.C.I.C.A
+        p Une formation professionnelle exigeante, tournée vers l'industrie, le commerce et l'administration.
+        .home-hero__actions
+          a.home-button(href="/presentation/Presentation") Découvrir l'école
+          a.home-button.home-button--secondary(href="/contact") Nous contacter
+
+    section.acces-direct-container
+      .section-heading
+        span Accès rapide
+        h2 Informations utiles
+      .acces-cards
+        article.acces-item
+          a.link-menu(href="/Emplois")
+            img(src="/img/Emploi_du_temps.jpg" alt="Emploi du temps")
+            .acces-item__body
+              b Emplois du temps
+              p.details
+                span 18 mars 2026
+                span Étudiants
+
+    section.a-l-a-une-container
+      .posts
+        .carousel-imgs_acces-directs
+          .carousel-imgs
+            .section-heading
+              span Actualités
+              h2 À la une
+            .carousel
+              article
+                img.article_imgs(src="/img/picture4.png", alt="Actualité E.C.I.C.A")
+              .carousel-controle
+                .prev
+                .next
+
+        .about-school-section
+          .section-heading
+            span À propos
+            h2 Une école au service des talents
+          .about-school-description
+            p L'École Centrale pour l'Industrie, le Commerce et l'Administration (E.C.I.C.A) est une institution de référence historique, pionnière dans la formation professionnelle d'excellence. Depuis sa création, elle forme des cadres, des techniciens et des entrepreneurs qui contribuent activement au développement socio-économique de la nation.
+            p Animée par des valeurs de rigueur, d'intégrité et d'innovation, l'école propose une approche pédagogique pluridisciplinaire de haut niveau, couvrant les filières industrielles ainsi que les domaines stratégiques du commerce et de l'administration.
+            p Grâce à un corps professoral engagé, des infrastructures en modernisation continue et un réseau de partenaires institutionnels et professionnels, l'E.C.I.C.A prépare ses étudiants à relever les défis du marché de l'emploi avec assurance et leadership.
+
+        .guide-actualiser
+          .guide-actualiser-header
+            .section-heading
+              span Ressource
+              h2 Guide de l'étudiant
+            p.title Retrouvez les informations essentielles pour réussir votre parcours à l'E.C.I.C.A.
+          a.guide-actualiser-img(href="#")
+            img(src="/img/IMG_0288.jpeg", alt="Guide de l'étudiant")
+
+        .static-container
+          .chiffer-container
+            h3 E.C.I.C.A en chiffres
+            .chiffre-datas
+              .chiffre-item
+                .data
+                  span 259
+                .title Professeurs
+              .chiffre-item
+                .data
+                  span 4751
+                .title Étudiants
+              .chiffre-item
+                .data
+                  span 258
+                .title Étudiants internationaux
+              .chiffre-item
+                .data
+                  span 3000
+                .title Diplômés
+          .mission-container
+            h3 Notre mission
+            .mission-description
+              p L'E.C.I.C.A promeut une formation professionnelle d'excellence en dotant ses élèves de compétences adaptées au monde professionnel et aux exigences du marché du travail.
+            .date-container
+              h4 Création
+              span 1969
