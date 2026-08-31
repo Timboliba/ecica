@@ -1311,7 +1311,12 @@ article .text p {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(12, 22, 35, 0.88), rgba(12, 22, 35, 0.45) 52%, rgba(12, 22, 35, 0.12));
+  background: linear-gradient(
+    90deg,
+    rgba(12, 22, 35, 0.88),
+    rgba(12, 22, 35, 0.45) 52%,
+    rgba(12, 22, 35, 0.12)
+  );
 }
 
 .home-hero__media img {
@@ -1345,9 +1350,9 @@ article .text p {
 
 .home-kicker,
 .section-heading span {
-  color: #d7193f;
-  font-size: 0.78rem;
-  font-weight: 800;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1370,7 +1375,9 @@ article .text p {
   color: #fff;
   font-weight: 800;
   text-decoration: none;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .home-button:hover {
@@ -1417,7 +1424,9 @@ article .text p {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background-color: #f8fafc;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .acces-item:hover {
@@ -1603,7 +1612,11 @@ article .text p {
 
 @media (max-width: 900px) {
   .home-hero__media::after {
-    background: linear-gradient(0deg, rgba(12, 22, 35, 0.88), rgba(12, 22, 35, 0.18));
+    background: linear-gradient(
+      0deg,
+      rgba(12, 22, 35, 0.88),
+      rgba(12, 22, 35, 0.18)
+    );
   }
 
   .guide-actualiser,
