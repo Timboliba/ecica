@@ -53,11 +53,11 @@
 
 // IMAGES
 const imgs = [
-  "/img/picture1.png",
-  "/img/picture2.png",
-  "/img/picture3.png",
-  "/img/picture4.png",
-  "/img/picture5.png",
+  "/img/picture1.webp",
+  "/img/picture2.webp",
+  "/img/picture3.webp",
+  "/img/picture4.webp",
+  "/img/picture5.webp",
 ];
 
 // ELEMENTS
