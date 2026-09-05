@@ -651,7 +651,8 @@ header {
   border-top: 2px solid silver;
 }
 
-.presentation-space article {
+.presentation-space article,
+.admin-space {
   padding: 20px;
   background: #fff;
   border-radius: 10px;
