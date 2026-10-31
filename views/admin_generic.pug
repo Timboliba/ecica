@@ -1,0 +1,19 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    .dashboard-header
+      .greeting-block
+        h2.greeting-title= sectionTitle || "Module Administratif"
+        p.greeting-subtitle= sectionSubtitle || "Espace de gestion dédié à l'administration de l'ECICA."
+
+    .dashboard-card(style="margin-top: 24px; padding: 32px; border-radius: 8px; background: #fff; border: 1px solid var(--border-color, #e2e8f0); text-align: center;")
+      .empty-icon(style="margin-bottom: 16px; color: #3b82f6;")
+        svg(width="48", height="48", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="1.5")
+          circle(cx="12", cy="12", r="10")
+          line(x1="12", y1="8", x2="12", y2="12")
+          line(x1="12", y1="16", x2="12.01", y2="16")
+      h3(style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;") Module #{sectionTitle}
+      p(style="color: #64748b; font-size: 0.95rem; max-width: 500px; margin: 0 auto 20px;") Les données et fonctionnalités associées à ce module sont accessibles en temps réel dans cette Single Page Application.
+      a(href="/admin/cpanel" class="date-filter-btn" style="display: inline-flex; text-decoration: none; font-weight: 600;") &larr; Retour au Dashboard
+

@@ -5,12 +5,14 @@ const presentation = require("./presentations.routes");
 const contact = require("./contact.routes");
 const liens = require("./liens.routes");
 const systemeEducatif = require("./formations.routes");
-const emploisDuTemps = require('./emplois-list.routes')
+const emploisDuTemps = require("./emplois-list.routes");
+const admin = require("./admin.routes");
 const user = { name: "joen doe" };
 router.get("/", (req, res) => {
   res.render("acceuil", { user });
 });
 
+router.use("/admin", admin);
 router.use("/student", student);
 router.use("/teacher", teacher);
 router.use("/presentation", presentation);

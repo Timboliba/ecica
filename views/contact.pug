@@ -10,9 +10,17 @@ block content
         .contact-title
             p Contactez nous
 
+        if success
+            .alert.alert-success(style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #c3e6cb;")
+                | ✅ Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.
+
+        if error
+            .alert.alert-danger(style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #f5c6cb;")
+                | ❌ #{error}
+
         .contact-and-address-container
             .address-container
-                h3 Localisation de l'E.C.I.C.A
+                h3 Localisation de l'#{contactInfo && contactInfo.nom_etablissement ? contactInfo.nom_etablissement : "E.C.I.C.A"}
                 .map-container(style="height:470px; width:100%; border-radius:12px;")
 
             .contact-container
@@ -21,49 +29,49 @@ block content
                     .contact-item 
                         p.contact-item-icon 📍
                         p.contact-info
-                            span.title Adresse Postal: 
-                            span.info BP:1828     
+                            span.title Adresse Postale: 
+                            span.info #{contactInfo && contactInfo.adresse_postale ? contactInfo.adresse_postale : "BP:1828"}     
 
                     .contact-item 
                         p.contact-item-icon 📞
                         p.contact-info
                             span.title Fax: 
-                            span.info 20 22 26 91     
+                            span.info #{contactInfo && contactInfo.fax ? contactInfo.fax : "20 22 26 91"}     
 
                     .contact-item 
                         p.contact-item-icon ☎️
                         p.contact-info
                             span.title Secrétariat Général: 
-                            span.info 20 22 26 91     
+                            span.info #{contactInfo && contactInfo.telephone ? contactInfo.telephone : "20 22 26 91"}     
 
                     .contact-item 
                         p.contact-item-icon ✉️
                         p.contact-info
                             span.title Adresse E-mail: 
-                            span.info contact@email.com     
+                            span.info #{contactInfo && contactInfo.email ? contactInfo.email : "contact@ecica.edu.ml"}     
 
         .contact-form
             h2 Envoyer un message 
-            form(action="")
+            form(action="/contact", method="POST")
                 .fullname-and-email 
                     div(class="input-group")
-                        label(for="full-name") Nom complet 
+                        label(for="fullname") Nom complet 
                             span *
-                        input(type="text" name="fullname" id="fullname" placeholder="Votre nom")
+                        input(type="text", name="fullname", id="fullname", placeholder="Votre nom complet", required)
                     div(class="input-group")
                         label(for="email") Email 
                             span *
-                        input(type="email" name="email" id="email" placeholder="email@exempe.com")
+                        input(type="email", name="email", id="email", placeholder="email@exemple.com", required)
                 
                 div(class="input-group")
-                    label(for="full-name") Sujet 
+                    label(for="sujet") Sujet 
                         span *
-                    input(type="text" name="sujet" id="sujet" placeholder="Objet de votre message")
+                    input(type="text", name="sujet", id="sujet", placeholder="Objet de votre message", required)
                 
                 div(class="input-group")
-                    label(for="full-name") Message 
+                    label(for="message") Message 
                         span *
-                    textarea(name="message", cols="30", rows="10") Votre message... 
+                    textarea(name="message", id="message", cols="30", rows="6", placeholder="Votre message...", required)
                 div(class="input-group")
                     input(type="submit", value="Envoyer le message")
 
@@ -72,18 +80,19 @@ block content
 
     // 🔥 Script carte
     script.
-        const map = L.map(document.querySelector('.map-container')).setView([12.63, -8], 12,"center");
+        const lat = #{contactInfo && contactInfo.latitude ? contactInfo.latitude : 12.6549};
+        const lng = #{contactInfo && contactInfo.longitude ? contactInfo.longitude : -7.9965};
+        const nomEtablissement = "#{contactInfo && contactInfo.nom_etablissement ? contactInfo.nom_etablissement : 'ECICA'}";
+
+        const map = L.map(document.querySelector('.map-container')).setView([lat, lng], 13);
 
         // 🔹 Style de carte (propre)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-        // 🔥 Points (adresse)
-        const locations = [
-            { lat: 12.6549, lng:  -7.9965, name: "ECICA" },
-        ];
-
-        locations.forEach(loc => {
-            L.marker([loc.lat, loc.lng])
-                .addTo(map)
-                .bindPopup(loc.name);
-        });
+        // 🔥 Marqueur adresse
+        L.marker([lat, lng])
+            .addTo(map)
+            .bindPopup(nomEtablissement)
+            .openPopup();

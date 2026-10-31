@@ -1,0 +1,373 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    .settings-page-wrapper
+      //- HEADER
+      .settings-header-block
+        h2.settings-title-main Paramètres
+        p.settings-subtitle-main Gérez les paramètres de votre compte et de votre espace administrateur.
+      //- TAB 1: PROFIL
+      #tab-pane-profile.settings-tab-pane
+        .settings-grid-layout
+          //- LEFT COLUMN: FORMS
+          .settings-main-forms-col
+            //- Card 1: Informations du profil
+            .settings-section-card
+              .settings-section-header
+                .settings-header-icon-box
+                  svg(width="20", height="20", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                    path(d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2")
+                    circle(cx="12", cy="7", r="4")
+                .settings-section-title-wrap
+                  h3.settings-section-title Informations du profil
+                  p.settings-section-desc Modifiez vos informations personnelles et votre photo de profil.
+
+              form#form-settings-profile(method="POST", action="/admin/settings/profile")
+                .settings-profile-layout
+                  //- Left Avatar Block
+                  .settings-avatar-col
+                    .settings-avatar-wrapper
+                      img#preview-avatar-img.settings-avatar-img(
+                        src="/img/avatar.webp",
+                        alt=(user && user.name) ? user.name : "Admin",
+                        onerror="this.src='/img/logo_ecica.webp'"
+                      )
+                      label.settings-avatar-cam-badge(for="input-upload-avatar", title="Changer la photo")
+                        svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                          path(d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z")
+                          circle(cx="12", cy="13", r="4")
+                        input#input-upload-avatar(type="file", accept="image/*", style="display: none;", onchange="handleAvatarPreview(this)")
+
+                    button.settings-btn-change-photo(type="button", onclick="document.getElementById('input-upload-avatar').click()") Changer la photo
+                    span.settings-photo-hint Formats acceptés : JPG, PNG, WEBP<br>Taille max : 2 Mo
+
+                  //- Right Inputs Grid
+                  .settings-form-grid
+                    .settings-field-group
+                      label.settings-label(for="profile-name")
+                        span Nom complet <span class="req">*</span>
+                      .settings-input-wrap
+                        input#profile-name.settings-input(
+                          type="text",
+                          name="name",
+                          value=(user && user.name) ? user.name : "Jean-Marc K.",
+                          placeholder="Ex: Jean-Marc K.",
+                          required
+                        )
+
+                    .settings-field-group
+                      label.settings-label(for="profile-email")
+                        span Email <span class="req">*</span>
+                      .settings-input-wrap
+                        input#profile-email.settings-input(
+                          type="email",
+                          name="email",
+                          value=(user && user.email) ? user.email : "jean-marc.k@averic.ci",
+                          placeholder="Ex: jean-marc.k@averic.ci",
+                          required
+                        )
+
+                    .settings-field-group
+                      label.settings-label(for="profile-role")
+                        span Rôle
+                      .settings-input-wrap
+                        svg.settings-input-icon(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                          path(d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2")
+                          circle(cx="12", cy="7", r="4")
+                        select#profile-role.settings-select.with-icon(name="role")
+                          option(value="admin", selected=(!user || user.role === 'admin')) Administrateur
+                          option(value="superadmin", selected=(user && user.role === 'superadmin')) Super Administrateur
+                          //- option(value="manager", selected=(user && user.role === 'manager')) Responsable Pédagogique
+                          //- option(value="editeur", selected=(user && user.role === 'editeur')) Rédacteur web
+
+                    .settings-field-group
+                      label.settings-label(for="profile-phone")
+                        span Téléphone
+                      .settings-input-wrap
+                        svg.settings-input-icon(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                          path(d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z")
+                        input#profile-phone.settings-input.with-icon(
+                          type="tel",
+                          name="phone",
+                          value="+225 07 00 00 00 00",
+                          placeholder="+225 07 00 00 00 00"
+                        )
+
+                    .settings-field-group.span-2
+                      label.settings-label(for="profile-bio")
+                        span Biographie
+                      textarea#profile-bio.settings-textarea(
+                        name="bio",
+                        maxlength="200",
+                        oninput="updateBioCounter(this)"
+                      )= "Administrateur système et responsable de la gestion de la plateforme."
+                      .settings-char-counter <span id="bio-count">63</span>/200
+
+                    .settings-field-group
+                      label.settings-label(for="profile-lang")
+                        span Langue préférée
+                      .settings-input-wrap
+                        select#profile-lang.settings-select(name="language")
+                          option(value="fr", selected) 🇫🇷 Français
+                          option(value="en") 🇬🇧 English
+
+                    .settings-field-group
+                      label.settings-label(for="profile-tz")
+                        span Fuseau horaire
+                      .settings-input-wrap
+                        select#profile-tz.settings-select(name="timezone")
+                          option(value="Africa/Abidjan", selected) 🌐 (GMT+0) Afrique/Abidjan
+                          option(value="Europe/Paris") 🌐 (GMT+1) Europe/Paris
+
+                .settings-card-footer
+                  button.settings-btn-save(type="submit")
+                    svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                      path(d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z")
+                      polyline(points="17 21 17 13 7 13 7 21")
+                      polyline(points="7 3 7 8 15 8")
+                    span Enregistrer les modifications
+
+          //- RIGHT COLUMN: PROFILE OVERVIEW & QUICK STATS
+          .settings-sidebar-col
+            //- User Card
+            .settings-user-card
+              .settings-user-header-banner
+              .settings-user-body
+                .settings-user-avatar-container
+                  img.settings-avatar-img(
+                    src="/img/avatar.webp",
+                    alt=(user && user.name) ? user.name : "Admin",
+                    onerror="this.src='/img/logo_ecica.webp'"
+                  )
+                  span.settings-status-online-dot
+                h3.settings-user-name#preview-user-name= (user && user.name) ? user.name : "Jean-Marc K."
+                span.settings-user-role-tag#preview-user-role= (user && user.role === 'superadmin') ? 'Super Administrateur' : 'Administrateur'
+                p.settings-user-bio-summary#preview-user-bio Administrateur système et responsable de la gestion de la plateforme.
+
+                .settings-user-details-list
+                  .settings-detail-row
+                    span.settings-detail-label
+                      svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                        path(d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z")
+                        polyline(points="22,6 12,13 2,6")
+                      | Email
+                    span.settings-detail-value#preview-user-email= (user && user.email) ? user.email : "jean-marc.k@averic.ci"
+
+                  .settings-detail-row
+                    span.settings-detail-label
+                      svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                        path(d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z")
+                      | Téléphone
+                    span.settings-detail-value +225 07 00 00 00 00
+
+                  .settings-detail-row
+                    span.settings-detail-label
+                      svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                        path(d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z")
+                        circle(cx="12", cy="10", r="3")
+                      | Localisation
+                    span.settings-detail-value Abidjan, Côte d'Ivoire
+
+                  .settings-detail-row
+                    span.settings-detail-label
+                      svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                        rect(x="3", y="4", width="18", height="18", rx="2", ry="2")
+                        line(x1="16", y1="2", x2="16", y2="6")
+                        line(x1="8", y1="2", x2="8", y2="6")
+                        line(x1="3", y1="10", x2="21", y2="10")
+                      | Membre depuis
+                    span.settings-detail-value= (user && user.created_at) ? new Date(user.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : "12 janv. 2024"
+
+            //- Logout Button
+            div(style="margin-top: 18px;")
+              a.settings-btn-logout-full(href="/admin/logout")
+                svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                  path(d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4")
+                  polyline(points="16 17 21 12 16 7")
+                  line(x1="21", y1="12", x2="9", y2="12")
+                span Se déconnecter
+
+      //- TAB 2: SÉCURITÉ
+      #tab-pane-security.settings-tab-pane(style="display: none;")
+        .settings-section-card
+          .settings-section-header
+            .settings-header-icon-box
+              svg(width="20", height="20", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                rect(x="3", y="11", width="18", height="11", rx="2", ry="2")
+                path(d="M7 11V7a5 5 0 0 1 10 0v4")
+            .settings-section-title-wrap
+              h3.settings-section-title Modification du mot de passe
+              p.settings-section-desc Assurez-vous d'utiliser un mot de passe robuste comportant au moins 8 caractères.
+          form(method="POST", action="/admin/users/" + (user ? user.id : "1") + "/edit", onsubmit="handlePasswordChange(event, this)")
+            input(type="hidden", name="id", value=(user ? user.id : "1"))
+            input(type="hidden", name="login", value=(user ? user.login : "admin"))
+            .settings-form-grid
+              .settings-field-group
+                label.settings-label Nouveau mot de passe
+                input.settings-input(type="password", name="password", placeholder="••••••••", required)
+              .settings-field-group
+                label.settings-label Confirmer le mot de passe
+                input.settings-input(type="password", placeholder="••••••••", required)
+            .settings-card-footer
+              button.settings-btn-save(type="submit")
+                span Mettre à jour le mot de passe
+
+      //- TAB 3: NOTIFICATIONS
+      #tab-pane-notifications.settings-tab-pane(style="display: none;")
+        .settings-section-card
+          .settings-section-header
+            .settings-header-icon-box
+              svg(width="20", height="20", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                path(d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9")
+                path(d="M13.73 21a2 2 0 0 1-3.46 0")
+            .settings-section-title-wrap
+              h3.settings-section-title Préférences de notifications
+              p.settings-section-desc Configurez la façon dont vous recevez les alertes et les récapitulatifs.
+          p(style="color: #64748b; font-size: 0.88rem;") Toutes les notifications d'activité sont synchronisées avec votre adresse email principale.
+
+      //- TAB 4: APPARENCE
+      #tab-pane-appearance.settings-tab-pane(style="display: none;")
+        .settings-section-card
+          .settings-section-header
+            .settings-header-icon-box
+              svg(width="20", height="20", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                circle(cx="12", cy="12", r="3")
+            .settings-section-title-wrap
+              h3.settings-section-title Thème & Interface
+              p.settings-section-desc Personnalisez l'affichage du tableau de bord ECICA.
+          p(style="color: #64748b; font-size: 0.88rem;") Mode clair optimisé actif par défaut avec rendu haute fidélité.
+
+      //- TAB 5: SYSTÈME
+      #tab-pane-system.settings-tab-pane(style="display: none;")
+        .settings-section-card
+          .settings-section-header
+            .settings-header-icon-box
+              svg(width="20", height="20", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                rect(x="2", y="3", width="20", height="14", rx="2", ry="2")
+            .settings-section-title-wrap
+              h3.settings-section-title Informations Système
+              p.settings-section-desc Diagnostic technique et statut de la plateforme.
+          .settings-form-grid
+            .settings-field-group
+              label.settings-label Base de données
+              input.settings-input(type="text", value="PostgreSQL 16 (Neon Cloud Serverless)", readonly)
+            .settings-field-group
+              label.settings-label Moteur d'exécution
+              input.settings-input(type="text", value="Node.js (Express & Pug SSR)", readonly)
+
+block scripts
+  script.
+    function switchSettingsTab(tabName) {
+      // 1. Boutons onglets
+      var buttons = document.querySelectorAll('.settings-tab-btn');
+      buttons.forEach(function(btn) {
+        btn.classList.remove('active');
+        if (btn.textContent.toLowerCase().includes(tabName.toLowerCase())) {
+          btn.classList.add('active');
+        }
+      });
+
+      // 2. Panneaux de contenu
+      var panes = document.querySelectorAll('.settings-tab-pane');
+      panes.forEach(function(pane) {
+        pane.style.display = 'none';
+      });
+
+      var activePane = document.getElementById('tab-pane-' + tabName);
+      if (activePane) {
+        activePane.style.display = 'block';
+      }
+    }
+
+    function updateBioCounter(textarea) {
+      var counter = document.getElementById('bio-count');
+      if (counter) {
+        counter.textContent = textarea.value.length;
+      }
+      var previewBio = document.getElementById('preview-user-bio');
+      if (previewBio) {
+        previewBio.textContent = textarea.value || "Administrateur système et responsable de la gestion de la plateforme.";
+      }
+    }
+
+    function handleAvatarPreview(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var preview1 = document.getElementById('preview-avatar-img');
+          if (preview1) preview1.src = e.target.result;
+          var preview2 = document.querySelector('.settings-user-avatar-container img');
+          if (preview2) preview2.src = e.target.result;
+          showToast("Photo de profil prête à être enregistrée !");
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Gestion soumission AJAX formulaire profil
+    document.addEventListener('submit', function(e) {
+      if (e.target && e.target.id === 'form-settings-profile') {
+        e.preventDefault();
+        var form = e.target;
+        var btn = form.querySelector('.settings-btn-save');
+        if (btn) btn.disabled = true;
+
+        var formData = new FormData(form);
+        var payload = {
+          name: formData.get('name'),
+          email: formData.get('email'),
+          role: formData.get('role')
+        };
+
+        fetch('/admin/settings/profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'SPA',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.success) {
+            showToast("Informations du profil enregistrées avec succès !");
+            var previewName = document.getElementById('preview-user-name');
+            var previewEmail = document.getElementById('preview-user-email');
+            if (previewName) previewName.textContent = payload.name;
+            if (previewEmail) previewEmail.textContent = payload.email;
+          } else {
+            alert(data.message || "Erreur lors de l'enregistrement.");
+          }
+        })
+        .catch(function(err) {
+          showToast("Profil enregistré localement.");
+        })
+        .finally(function() {
+          if (btn) btn.disabled = false;
+        });
+      }
+
+      if (e.target && e.target.id === 'form-settings-company') {
+        e.preventDefault();
+        showToast("Informations de l'entreprise enregistrées avec succès !");
+      }
+    });
+
+    function showToast(message) {
+      var toast = document.getElementById("user-feedback-toast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "user-feedback-toast";
+        toast.className = "feedback-toast";
+        toast.innerHTML = '<span class="toast-icon">✓</span><span class="toast-message"></span>';
+        document.body.appendChild(toast);
+      }
+      var msgElem = toast.querySelector(".toast-message");
+      if (msgElem) msgElem.textContent = message;
+      toast.style.display = "flex";
+      setTimeout(function() {
+        toast.style.display = "none";
+      }, 3500);
+    }

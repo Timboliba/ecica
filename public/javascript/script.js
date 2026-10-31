@@ -168,3 +168,93 @@ window.addEventListener("resize", () => {
       .forEach((menu) => menu.classList.remove("active"));
   }
 });
+
+//====================== Pagination & Carrousel des formations
+const sliderWrapper = document.querySelector(".formation-slider-wrapper");
+const cardsContainer = document.querySelector(".formation-cards");
+const prevBtn = document.querySelector(".formation-nav-btn--prev");
+const nextBtn = document.querySelector(".formation-nav-btn--next");
+const pageIndicator = document.querySelector(".formation-page-indicator");
+
+if (sliderWrapper && cardsContainer && prevBtn && nextBtn) {
+  const cards = cardsContainer.querySelectorAll(".formation-card");
+  let currentPage = 0;
+
+  const getVisibleCount = () => {
+    if (window.innerWidth <= 600) return 1;
+    if (window.innerWidth <= 1024) return 2;
+    return 4;
+  };
+
+  const getTotalPages = () => {
+    const visible = getVisibleCount();
+    return Math.max(1, Math.ceil(cards.length / visible));
+  };
+
+  const updatePagination = () => {
+    const visible = getVisibleCount();
+    const totalPages = getTotalPages();
+
+    if (currentPage >= totalPages) currentPage = totalPages - 1;
+    if (currentPage < 0) currentPage = 0;
+
+    const wrapperWidth = sliderWrapper.offsetWidth;
+    const offset = currentPage * (wrapperWidth + 20);
+
+    cardsContainer.style.transform = `translateX(-${offset}px)`;
+
+    if (pageIndicator) {
+      pageIndicator.textContent = `${currentPage + 1} / ${totalPages}`;
+    }
+
+    prevBtn.disabled = currentPage === 0;
+    nextBtn.disabled = currentPage >= totalPages - 1;
+  };
+
+  prevBtn.addEventListener("click", () => {
+    if (currentPage > 0) {
+      currentPage--;
+      updatePagination();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    const totalPages = getTotalPages();
+    if (currentPage < totalPages - 1) {
+      currentPage++;
+      updatePagination();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    updatePagination();
+  });
+
+  // Support tactile mobile (glisser / swipe)
+  let touchStartX = 0;
+  sliderWrapper.addEventListener(
+    "touchstart",
+    (e) => {
+      touchStartX = e.touches[0].clientX;
+    },
+    { passive: true }
+  );
+
+  sliderWrapper.addEventListener(
+    "touchend",
+    (e) => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      const totalPages = getTotalPages();
+      if (diff > 50 && currentPage < totalPages - 1) {
+        currentPage++;
+        updatePagination();
+      } else if (diff < -50 && currentPage > 0) {
+        currentPage--;
+        updatePagination();
+      }
+    },
+    { passive: true }
+  );
+
+  updatePagination();
+}

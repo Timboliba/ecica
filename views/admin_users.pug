@@ -1,0 +1,563 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    .users-page-container
+      //- MAIN 2-COLUMN WORKSPACE
+      .users-workspace-grid
+        //- LEFT MAIN TABLE CARD
+        .users-main-card
+          //- Tabs Bar
+          //- .users-tabs-bar
+          //-   .users-tabs-list
+          //-     button.users-tab-item.active(type="button") Utilisateurs
+
+          //- Tab Content: Users
+          #tab-content-users
+            //- Toolbar
+            .users-toolbar-row
+              .users-search-box
+                svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                  circle(cx="11", cy="11", r="8")
+                  line(x1="21", y1="21", x2="16.65", y2="16.65")
+                input#users-table-search.users-search-input(
+                  type="text",
+                  placeholder="Rechercher un utilisateur, un email...",
+                  oninput="handleUserSearch(this.value)"
+                )
+
+              select#filter-user-role.users-select-filter(onchange="handleFilterChange()")
+                option(value="") Tous les rôles
+                option(value="Administrateur") Administrateur
+                option(value="Super Administrateur") Super Administrateur
+                //- option(value="Chef de projet") Chef / Cheffe de projet
+                //- option(value="Commercial") Commercial
+                //- option(value="Rédacteur") Rédacteur
+                //- option(value="Développeur") Développeur
+                //- option(value="Marketing") Marketing
+                //- option(value="Designer") Designer
+
+              select#filter-user-status.users-select-filter(onchange="handleFilterChange()")
+                option(value="") Tous les statuts
+                option(value="Actif") Actif
+                option(value="Inactif") Inactif
+
+              button.users-btn-filter(type="button", onclick="handleFilterReset()", title="Réinitialiser les filtres")
+                svg(width="15", height="15", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                  line(x1="4", y1="21", x2="4", y2="14")
+                  line(x1="4", y1="10", x2="4", y2="3")
+                  line(x1="12", y1="21", x2="12", y2="12")
+                  line(x1="12", y1="8", x2="12", y2="3")
+                  line(x1="20", y1="21", x2="20", y2="16")
+                  line(x1="20", y1="12", x2="20", y2="3")
+                  line(x1="1", y1="14", x2="7", y2="14")
+                  line(x1="9", y1="8", x2="15", y2="8")
+                  line(x1="17", y1="16", x2="23", y2="16")
+                span Filtres
+
+              button.users-btn-icon-action(type="button", title="Exporter la liste", onclick="exportUsersCSV()")
+                svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                  path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+                  polyline(points="7 10 12 15 17 10")
+                  line(x1="12", y1="15", x2="12", y2="3")
+
+              button#btn-open-create-admin.users-btn-create-primary(type="button", onclick="openCreateModal()")
+                svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                  line(x1="12", y1="5", x2="12", y2="19")
+                  line(x1="5", y1="12", x2="19", y2="12")
+                span Nouvel Utilisateur
+
+            //- Data Table Wrap
+            .users-table-wrap
+              table.users-custom-table#users-table
+                thead
+                  tr
+                    th(style="width: 40px;")
+                      input.users-checkbox-custom#check-all-users(type="checkbox", onchange="toggleSelectAllUsers(this)")
+                    th Utilisateur
+                    th Email
+                    th Rôle
+                    th Statut
+                    th Date de création / Connexion
+                    th(style="text-align: right;") Actions
+                tbody#users-tbody
+                  if admins && admins.length
+                    each admin, index in admins
+                      - const isCurrent = (user && (user.id === admin.id || user.login === admin.login));
+                      - const roleLabel = (admin.role === 'superadmin' ? 'Super Administrateur' : (admin.role === 'admin' ? 'Administrateur' : (admin.role === 'manager' ? 'Chef de projet' : (admin.role === 'editeur' ? 'Rédacteur' : (admin.role === 'commercial' ? 'Commercial' : (admin.role === 'developpeur' ? 'Développeur' : (admin.role === 'marketing' ? 'Marketing' : (admin.role === 'designer' ? 'Designer' : admin.role))))))));
+                      - const roleClass = (admin.role === 'superadmin' || admin.role === 'admin') ? 'admin' : (admin.role === 'manager' ? 'project_lead' : (admin.role === 'editeur' ? 'editor' : (admin.role === 'commercial' ? 'commercial' : (admin.role === 'developpeur' ? 'developer' : (admin.role === 'marketing' ? 'marketing' : (admin.role === 'designer' ? 'designer' : 'admin'))))));
+                      - const isActive = admin.is_active !== false;
+                      tr.user-row-item(
+                        data-id=admin.id,
+                        data-name=(admin.name || admin.login),
+                        data-login=admin.login,
+                        data-email=(admin.email || ""),
+                        data-role=roleLabel,
+                        data-status=(isActive ? "Actif" : "Inactif")
+                      )
+                        td
+                          input.users-checkbox-custom.user-row-check(type="checkbox")
+                        td
+                          .user-ident-cell
+                            .user-avatar-circle(style="background: " + (index % 2 === 0 ? "#e0e7ff; color: #4338ca;" : "#fef3c7; color: #b45309;"))
+                              = (admin.name ? admin.name.charAt(0).toUpperCase() : (admin.login ? admin.login.charAt(0).toUpperCase() : "A"))
+                            .user-ident-meta
+                              .user-name-line
+                                span.user-full-name= admin.name || admin.login
+                                if isCurrent
+                                  span.user-self-badge Vous
+                              span.user-title-sub= roleLabel
+                        td
+                          span.user-email-text= admin.email || "-"
+                        td
+                          span.role-pill-badge(class=roleClass)= roleLabel
+                        td
+                          if isActive
+                            span.status-pill-badge.active
+                              span.dot
+                              | Actif
+                          else
+                            span.status-pill-badge.inactive
+                              span.dot
+                              | Inactif
+                        td
+                          span.user-last-login= admin.created_at ? new Date(admin.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "-"
+                        td
+                          .user-actions-cell
+                            button.btn-table-action.btn-edit-admin(
+                              type="button",
+                              title="Modifier",
+                              data-id=admin.id,
+                              data-name=(admin.name || ""),
+                              data-login=admin.login,
+                              data-email=(admin.email || ""),
+                              data-role=admin.role,
+                              data-is_active=(isActive ? "true" : "false"),
+                              onclick="openEditModal(this)"
+                            )
+                              svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                                line(x1="4", y1="21", x2="4", y2="14")
+                                line(x1="4", y1="10", x2="4", y2="3")
+                                line(x1="12", y1="21", x2="12", y2="12")
+                                line(x1="12", y1="8", x2="12", y2="3")
+                                line(x1="20", y1="21", x2="20", y2="16")
+                                line(x1="20", y1="12", x2="20", y2="3")
+                                line(x1="1", y1="14", x2="7", y2="14")
+                                line(x1="9", y1="8", x2="15", y2="8")
+                                line(x1="17", y1="16", x2="23", y2="16")
+                            button.btn-table-action(
+                              type="button",
+                              title="Options",
+                              onclick="toggleRowDropdown(event, this)"
+                            )
+                              svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                                circle(cx="12", cy="12", r="1")
+                                circle(cx="12", cy="5", r="1")
+                                circle(cx="12", cy="19", r="1")
+                            .user-actions-dropdown
+                              button.user-dropdown-item(
+                                type="button",
+                                data-id=admin.id,
+                                data-name=(admin.name || ""),
+                                data-login=admin.login,
+                                data-email=(admin.email || ""),
+                                data-role=admin.role,
+                                data-is_active=(isActive ? "true" : "false"),
+                                onclick="openEditModal(this)"
+                              )
+                                svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                                  path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                                  path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                                | Modifier
+                              button.user-dropdown-item.danger(
+                                type="button",
+                                onclick="confirmDeleteAdmin(" + admin.id + ", '" + (admin.name || admin.login) + "')"
+                              )
+                                svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                                  polyline(points="3 6 5 6 21 6")
+                                  path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+                                | Supprimer
+                  else
+                    tr
+                      td(colspan="7", style="padding: 40px; text-align: center; color: #94a3b8;")
+                        | Aucun utilisateur trouvé dans la base de données.
+
+            //- Pagination Bar
+            .users-pagination-bar
+              .users-pagination-left
+                span Afficher
+                select.users-pagesize-select(onchange="changePageSize(this.value)")
+                  option(value="10", selected) 10
+                  option(value="25") 25
+                  option(value="50") 50
+                span sur <strong id="total-users-label">#{admins ? admins.length : 0}</strong> utilisateurs
+
+              .users-pagination-controls
+                button.users-page-btn(type="button", disabled)
+                  svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                    polyline(points="15 18 9 12 15 6")
+                button.users-page-btn.active(type="button") 1
+                button.users-page-btn(type="button", disabled)
+                  svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                    polyline(points="9 18 15 12 9 6")
+
+          //- Tab Content: Roles
+          #tab-content-roles(style="display: none; padding: 24px;")
+            h3(style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;") Gestion des Rôles & Permissions
+            p(style="color: #64748b; font-size: 0.88rem; margin-bottom: 20px;") Niveaux de permissions configurés pour la plateforme ECICA.
+            .roles-grid(style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;")
+              .role-card(style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background: #faf5ff;")
+                .role-header(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
+                  span.role-pill-badge.admin Administrateur
+                p(style="font-size: 0.8rem; color: #64748b; margin: 0;") Accès complet au panneau d'administration, gestion des utilisateurs, base de données et configuration.
+              .role-card(style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background: #f0f9ff;")
+                .role-header(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
+                  span.role-pill-badge.project_lead Chef de projet
+                p(style="font-size: 0.8rem; color: #64748b; margin: 0;") Gestion des plannings, suivi des formations, validation pédagogique et reporting.
+              .role-card(style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background: #f0fdf4;")
+                .role-header(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
+                  span.role-pill-badge.commercial Commercial
+                p(style="font-size: 0.8rem; color: #64748b; margin: 0;") Suivi du CRM, gestion des demandes d'entreprises et prospects de formation.
+              .role-card(style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background: #fff7ed;")
+                .role-header(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
+                  span.role-pill-badge.editor Rédacteur
+                p(style="font-size: 0.8rem; color: #64748b; margin: 0;") Édition des actualités, publication des programmes de formation et contenus du site.
+
+        //- RIGHT SIDEBAR WIDGETS
+        .users-sidebar-stack
+          //- Card: Paramètres utilisateurs
+          .users-sidebar-card
+            h4.users-card-heading Paramètres & Sécurité
+            nav.settings-nav-list
+              a.settings-nav-item(href="/admin/settings")
+                .settings-nav-left
+                  svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                    path(d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z")
+                  span Politiques d'accès
+                span.settings-nav-arrow ›
+              a.settings-nav-item(href="/admin/settings")
+                .settings-nav-left
+                  svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                    rect(x="3", y="11", width="18", height="11", rx="2", ry="2")
+                    path(d="M7 11V7a5 5 0 0 1 10 0v4")
+                  span Sécurité & authentification
+                span.settings-nav-arrow ›
+              a.settings-nav-item(href="/admin/settings")
+                .settings-nav-left
+                  svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                    rect(x="2", y="3", width="20", height="14", rx="2", ry="2")
+                    line(x1="8", y1="21", x2="16", y2="21")
+                    line(x1="12", y1="17", x2="12", y2="21")
+                  span Sessions actives
+                span.settings-nav-arrow ›
+
+    //- MODALE DE CRÉATION D'UN UTILISATEUR / ADMIN
+    #modal-create-admin.admin-modal-backdrop(style="display: none;")
+      .admin-modal-dialog
+        .admin-modal-header
+          h3.admin-modal-title Ajouter un Nouvel Utilisateur
+          button.admin-modal-close(type="button", aria-label="Fermer", onclick="closeAllModals()") &times;
+        form#form-create-admin(method="POST", action="/admin/users")
+          .admin-modal-body
+            .modal-alert(style="display: none;")
+            .form-grid
+              .form-field
+                label(for="create-name") Nom et Prénom *
+                input#create-name(type="text", name="name", placeholder="Ex: Kouamé Koffi", required)
+              .form-field
+                label(for="create-login") Identifiant / Login *
+                input#create-login(type="text", name="login", placeholder="Ex: k.koffi", required)
+              .form-field
+                label(for="create-email") Adresse Email
+                input#create-email(type="email", name="email", placeholder="Ex: k.koffi@ecica.ci")
+              .form-field
+                label(for="create-role") Rôle système
+                select#create-role(name="role")
+                  option(value="admin", selected) Administrateur
+                  option(value="superadmin") Super Administrateur
+                  //- option(value="manager") Chef / Cheffe de projet
+                  //- option(value="commercial") Commercial
+                  //- option(value="editeur") Rédacteur / Rédactrice
+                  //- option(value="developpeur") Développeur
+                  //- option(value="marketing") Marketing
+                  //- option(value="designer") Designer
+              .form-field
+                label(for="create-status") Statut initial
+                select#create-status(name="is_active")
+                  option(value="true", selected) Actif
+                  option(value="false") Inactif
+              .form-field
+                label(for="create-password") Mot de passe initial *
+                input#create-password(type="password", name="password", placeholder="••••••••", required)
+          .admin-modal-footer
+            button.btn-modal-cancel(type="button", onclick="closeAllModals()") Annuler
+            button.btn-modal-submit(type="submit")
+              span.btn-text Créer l'utilisateur
+              span.btn-spinner(style="display: none;") ⏳ Enregistrement...
+
+    //- MODALE DE MODIFICATION
+    #modal-edit-admin.admin-modal-backdrop(style="display: none;")
+      .admin-modal-dialog
+        .admin-modal-header
+          h3.admin-modal-title Modifier l'Utilisateur
+          button.admin-modal-close(type="button", aria-label="Fermer", onclick="closeAllModals()") &times;
+        form#form-edit-admin(method="POST", action="/admin/users/edit")
+          input#edit-id(type="hidden", name="id")
+          .admin-modal-body
+            .modal-alert(style="display: none;")
+            .form-grid
+              .form-field
+                label(for="edit-name") Nom et Prénom
+                input#edit-name(type="text", name="name", placeholder="Ex: Kouamé Koffi")
+              .form-field
+                label(for="edit-login") Identifiant / Login *
+                input#edit-login(type="text", name="login", required)
+              .form-field
+                label(for="edit-email") Adresse Email
+                input#edit-email(type="email", name="email")
+              .form-field
+                label(for="edit-role") Rôle système
+                select#edit-role(name="role")
+                  option(value="admin") Administrateur
+                  option(value="superadmin") Super Administrateur
+                  option(value="manager") Chef / Cheffe de projet
+                  option(value="commercial") Commercial
+                  option(value="editeur") Rédacteur / Rédactrice
+                  option(value="developpeur") Développeur
+                  option(value="marketing") Marketing
+                  option(value="designer") Designer
+              .form-field
+                label(for="edit-status") Statut du compte
+                select#edit-status(name="is_active")
+                  option(value="true") Actif
+                  option(value="false") Inactif
+              .form-field
+                label(for="edit-password") Nouveau mot de passe
+                input#edit-password(type="password", name="password", placeholder="Laisser vide pour ne pas modifier")
+                small.field-hint(style="display: block; font-size: 0.75rem; color: #64748b; margin-top: 4px;") Laisser ce champ vide si vous ne souhaitez pas modifier le mot de passe.
+          .admin-modal-footer
+            button.btn-modal-cancel(type="button", onclick="closeAllModals()") Annuler
+            button.btn-modal-submit(type="submit")
+              span.btn-text Enregistrer les modifications
+              span.btn-spinner(style="display: none;") ⏳ Enregistrement...
+
+block scripts
+  script.
+    // Fermeture de tous les menus d'actions déroulants si clic à l'extérieur
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.user-actions-cell')) {
+        document.querySelectorAll('.user-actions-dropdown.show').forEach(function(d) {
+          d.classList.remove('show');
+        });
+      }
+    });
+
+    function toggleRowDropdown(event, btn) {
+      event.stopPropagation();
+      var cell = btn.closest('.user-actions-cell');
+      var dropdown = cell ? cell.querySelector('.user-actions-dropdown') : null;
+      var wasOpen = dropdown && dropdown.classList.contains('show');
+      document.querySelectorAll('.user-actions-dropdown.show').forEach(function(d) {
+        d.classList.remove('show');
+      });
+      if (dropdown && !wasOpen) {
+        dropdown.classList.add('show');
+      }
+    }
+
+    function switchUserTab(tab) {
+      var tabBtns = document.querySelectorAll('.users-tab-item');
+      tabBtns.forEach(function(b) {
+        b.classList.remove('active');
+        if ((tab === 'users' && b.textContent.includes('Utilisateurs')) ||
+            (tab === 'roles' && b.textContent.includes('Rôles'))) {
+          b.classList.add('active');
+        }
+      });
+      var usersContent = document.getElementById('tab-content-users');
+      var rolesContent = document.getElementById('tab-content-roles');
+      if (tab === 'users') {
+        if (usersContent) usersContent.style.display = 'block';
+        if (rolesContent) rolesContent.style.display = 'none';
+      } else {
+        if (usersContent) usersContent.style.display = 'none';
+        if (rolesContent) rolesContent.style.display = 'block';
+      }
+    }
+
+    function toggleSelectAllUsers(master) {
+      var checks = document.querySelectorAll('.user-row-check');
+      checks.forEach(function(c) {
+        c.checked = master.checked;
+      });
+    }
+
+    function handleUserSearch(query) {
+      var term = (query || '').toLowerCase().trim();
+      var roleFilter = document.getElementById('filter-user-role').value.toLowerCase();
+      var statusFilter = document.getElementById('filter-user-status').value.toLowerCase();
+      filterRows(term, roleFilter, statusFilter);
+    }
+
+    function handleFilterChange() {
+      var query = document.getElementById('users-table-search').value.toLowerCase().trim();
+      var roleFilter = document.getElementById('filter-user-role').value.toLowerCase();
+      var statusFilter = document.getElementById('filter-user-status').value.toLowerCase();
+      filterRows(query, roleFilter, statusFilter);
+    }
+
+    function handleFilterReset() {
+      document.getElementById('users-table-search').value = '';
+      document.getElementById('filter-user-role').value = '';
+      document.getElementById('filter-user-status').value = '';
+      filterRows('', '', '');
+    }
+
+    function filterRows(term, role, status) {
+      var rows = document.querySelectorAll('.user-row-item');
+      var visibleCount = 0;
+      rows.forEach(function(row) {
+        var name = (row.getAttribute('data-name') || '').toLowerCase();
+        var login = (row.getAttribute('data-login') || '').toLowerCase();
+        var email = (row.getAttribute('data-email') || '').toLowerCase();
+        var rowRole = (row.getAttribute('data-role') || '').toLowerCase();
+        var rowStatus = (row.getAttribute('data-status') || '').toLowerCase();
+
+        var matchSearch = !term || name.includes(term) || login.includes(term) || email.includes(term) || rowRole.includes(term);
+        var matchRole = !role || rowRole.includes(role);
+        var matchStatus = !status || rowStatus.includes(status);
+
+        if (matchSearch && matchRole && matchStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      var totalLabel = document.getElementById('total-users-label');
+      if (totalLabel) totalLabel.textContent = visibleCount;
+    }
+
+    function openCreateModal() {
+      var modal = document.getElementById("modal-create-admin");
+      if (modal) {
+        var form = document.getElementById("form-create-admin");
+        if (form) form.reset();
+        var alertBox = modal.querySelector(".modal-alert");
+        if (alertBox) {
+          alertBox.style.display = "none";
+          alertBox.textContent = "";
+        }
+        modal.style.display = "flex";
+        var first = modal.querySelector("#create-name");
+        if (first) first.focus();
+      }
+    }
+
+    function openEditModal(btn) {
+      var modal = document.getElementById("modal-edit-admin");
+      if (modal && btn) {
+        var alertBox = modal.querySelector(".modal-alert");
+        if (alertBox) {
+          alertBox.style.display = "none";
+          alertBox.textContent = "";
+        }
+        var id = btn.getAttribute("data-id") || "";
+        var name = btn.getAttribute("data-name") || "";
+        var login = btn.getAttribute("data-login") || "";
+        var email = btn.getAttribute("data-email") || "";
+        var role = btn.getAttribute("data-role") || "admin";
+        var isActive = btn.getAttribute("data-is_active") === "true";
+
+        var editId = document.getElementById("edit-id");
+        var editName = document.getElementById("edit-name");
+        var editLogin = document.getElementById("edit-login");
+        var editEmail = document.getElementById("edit-email");
+        var editRole = document.getElementById("edit-role");
+        var editStatus = document.getElementById("edit-status");
+        var editPassword = document.getElementById("edit-password");
+        var form = document.getElementById("form-edit-admin");
+
+        if (editId) editId.value = id;
+        if (editName) editName.value = name;
+        if (editLogin) editLogin.value = login;
+        if (editEmail) editEmail.value = email;
+        if (editRole) editRole.value = role;
+        if (editStatus) editStatus.value = isActive ? "true" : "false";
+        if (editPassword) editPassword.value = "";
+        if (form) form.action = "/admin/users/" + id + "/edit";
+
+        modal.style.display = "flex";
+        if (editName) editName.focus();
+      }
+    }
+
+    function confirmDeleteAdmin(id, name) {
+      if (confirm("Êtes-vous sûr de vouloir supprimer définitivement le compte de '" + name + "' ?")) {
+        fetch('/admin/users/' + id, {
+          method: 'DELETE',
+          headers: { 'X-Requested-With': 'SPA', 'Accept': 'application/json' }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.success) {
+            var row = document.querySelector('tr[data-id="' + id + '"]');
+            if (row) row.remove();
+            showToast("Administrateur supprimé avec succès.");
+            var totalLabel = document.getElementById('total-users-label');
+            if (totalLabel) {
+              var count = parseInt(totalLabel.textContent, 10) || 1;
+              totalLabel.textContent = Math.max(0, count - 1);
+            }
+          } else {
+            alert(data.message || "Erreur lors de la suppression.");
+          }
+        })
+        .catch(function(err) {
+          alert("Erreur lors de la suppression : " + err.message);
+        });
+      }
+    }
+
+    function exportUsersCSV() {
+      var rows = document.querySelectorAll('.user-row-item');
+      var csv = "Nom,Identifiant,Email,Role,Statut\n";
+      rows.forEach(function(r) {
+        if (r.style.display !== 'none') {
+          csv += '"' + (r.getAttribute('data-name')||'') + '","' + (r.getAttribute('data-login')||'') + '","' + (r.getAttribute('data-email')||'') + '","' + (r.getAttribute('data-role')||'') + '","' + (r.getAttribute('data-status')||'') + '"\n';
+        }
+      });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "utilisateurs_ecica.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Exportation CSV téléchargée avec succès !");
+    }
+
+    function closeAllModals() {
+      var modals = document.querySelectorAll(".admin-modal-backdrop");
+      modals.forEach(function(m) {
+        m.style.display = "none";
+      });
+    }
+
+    function showToast(message) {
+      var toast = document.getElementById("user-feedback-toast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "user-feedback-toast";
+        toast.className = "feedback-toast";
+        toast.innerHTML = '<span class="toast-icon">✓</span><span class="toast-message"></span>';
+        document.body.appendChild(toast);
+      }
+      var msgElem = toast.querySelector(".toast-message");
+      if (msgElem) msgElem.textContent = message;
+      toast.style.display = "flex";
+      setTimeout(function() {
+        toast.style.display = "none";
+      }, 3500);
+    }

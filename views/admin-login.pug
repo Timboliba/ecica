@@ -1,0 +1,46 @@
+doctype html
+html(lang="fr")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title= pageTitle || "Connexion Administration - ECICA"
+    link(rel="shortcut icon", href="/img/logo_ecica.webp", type="image/x-icon")
+    link(rel="stylesheet", href="/css/admin-login.css")
+  body
+    .login-wrapper
+      .brand-header
+        a(href="/" title="Retour au site ECICA")
+          img.brand-logo(src="/img/logo_ecica.webp", alt="Logo ECICA")
+
+      .login-card
+        .login-card-header
+          h2= cardTitle || "Espace Enseignant"
+
+        .login-card-body
+          if error
+            .alert.alert-error= error
+          if success
+            .alert.alert-success= success
+
+          form.login-form(action="/admin/login", method="POST")
+            .form-group
+              label(for="login") Login
+              .input-control
+                input#login(type="text", name="login", required, autofocus)
+
+            .form-group
+              label(for="password") Mot de passe
+              .input-control
+                input#password(type="password", name="password", required)
+
+            .form-group.remember-group
+              .checkbox-control
+                input#remember(type="checkbox", name="remember")
+                label(for="remember") Remember Me
+
+            .actions-group
+              button.btn-login(type="submit") Login
+
+      .login-footer
+        a(href="/") &larr; Retour au site principal
+

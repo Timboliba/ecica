@@ -1,0 +1,513 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+
+    //- ── HEADER ───────────────────────────────────────────────────────────
+    .contents-page-header
+      .contents-header-left
+      .contents-header-right
+        button#btn-open-create-content.contents-btn-new(type="button")
+          svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="12" y1="5" x2="12" y2="19")
+            line(x1="5" y1="12" x2="19" y2="12")
+          span Nouveau contenu
+
+    //- ── KPI CARDS ────────────────────────────────────────────────────────
+    .contents-kpi-grid
+      .ck-card
+        .ck-icon-wrap.ck-blue
+          svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            path(d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20")
+            path(d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z")
+        .ck-body
+          span.ck-label Publications
+          span.ck-value 56
+        .ck-trend.up
+          svg(width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+            polyline(points="23 6 13.5 15.5 8.5 10.5 1 18")
+          | +13%
+
+      .ck-card
+        .ck-icon-wrap.ck-teal
+          svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            path(d="M22 10v6M2 10l10-5 10 5-10 5z")
+            path(d="M6 12v5c3 3 9 3 12 0v-5")
+        .ck-body
+          span.ck-label Formations
+          span.ck-value 14
+        .ck-trend.up
+          svg(width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+            polyline(points="23 6 13.5 15.5 8.5 10.5 1 18")
+          | +8%
+
+      .ck-card
+        .ck-icon-wrap.ck-amber
+          svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            rect(x="3" y="4" width="18" height="18" rx="2" ry="2")
+            line(x1="16" y1="2" x2="16" y2="6")
+            line(x1="8" y1="2" x2="8" y2="6")
+            line(x1="3" y1="10" x2="21" y2="10")
+        .ck-body
+          span.ck-label Événements
+          span.ck-value 27
+        .ck-trend.up
+          svg(width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+            polyline(points="23 6 13.5 15.5 8.5 10.5 1 18")
+          | +5%
+
+      .ck-card
+        .ck-icon-wrap.ck-purple
+          svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            path(d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z")
+        .ck-body
+          span.ck-label Annonces
+          span.ck-value 12
+        .ck-trend.up
+          svg(width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+            polyline(points="23 6 13.5 15.5 8.5 10.5 1 18")
+          | +8%
+
+    //- ── BANNIÈRE SECTION ─────────────────────────────────────────────────
+    .contents-section-card
+      .contents-section-header
+        .contents-section-title-wrap
+          .contents-section-icon
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              rect(x="3" y="3" width="18" height="18" rx="2" ry="2")
+              circle(cx="8.5" cy="8.5" r="1.5")
+              polyline(points="21 15 16 10 5 21")
+          .contents-section-title-block
+            span.contents-section-title Bannière
+            p.contents-section-sub Image principale affichée sur le portail ECICA
+
+      .banner-preview-row
+        .banner-preview-visual
+          .banner-mock-card
+            .banner-mock-left
+              .banner-ecica-logo
+                img(src="/img/logo_ecica.webp" alt="ECICA" width="20" height="20")
+                span ECICA
+              h3 Se former aujourd'hui,
+                br
+                |  bâtir demain
+              p Des formations de qualité pour un avenir meilleur
+              button.banner-mock-cta Découvrir nos formations →
+            .banner-mock-right
+              img(src="/img/logo_ecica.webp" alt="Campus")
+
+        .banner-info-card
+          .banner-status-badge.published
+            span.dot
+            | Publiée
+          h4.banner-info-title Bannière principale du portail
+          p.banner-info-desc Image d'accueil du portail ECICA avec un message inspirant pour les apprenants
+          span.banner-info-date
+            svg(width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              circle(cx="12" cy="12" r="10")
+              polyline(points="12 6 12 12 16 14")
+            | Mis à jour le 16 mai 2024 – 10:34
+          .banner-actions
+            button.banner-btn-modifier(type="button")
+              svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+              | Modifier
+            button.banner-btn-remplacer(type="button")
+              svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                polyline(points="1 4 1 10 7 10")
+                path(d="M3.51 15a9 9 0 1 0 .49-3.51")
+              | Remplacer
+
+    //- ── PUBLICATIONS TABLE ───────────────────────────────────────────────
+    .contents-section-card
+      .contents-section-header
+        .contents-section-title-wrap
+          .contents-section-icon
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20")
+              path(d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z")
+          .contents-section-title-block
+            span.contents-section-title Publications
+            p.contents-section-sub Gérez vos actualités, articles, formations, événements et annonces
+
+      //- Filter Tabs + Search
+      .contents-table-toolbar
+        .contents-filter-tabs
+          button.cft-tab.active(type="button" onclick="filterContents('tous', this)") Tous
+          button.cft-tab(type="button" onclick="filterContents('actualite', this)") Actualités
+          button.cft-tab(type="button" onclick="filterContents('formation', this)") Formations
+          button.cft-tab(type="button" onclick="filterContents('evenement', this)") Événements
+          button.cft-tab(type="button" onclick="filterContents('annonce', this)") Annonces
+        .contents-search-wrap
+          svg(width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            circle(cx="11" cy="11" r="8")
+            line(x1="21" y1="21" x2="16.65" y2="16.65")
+          input#contents-search.contents-search-input(type="text" placeholder="Rechercher un contenu..." oninput="searchContents(this.value)")
+
+      //- Table
+      .contents-table-wrap
+        table.contents-table#contents-table
+          thead
+            tr
+              th(style="width:36px")
+                input.ck-checkbox(type="checkbox" id="check-all-contents" onchange="toggleAllContents(this)")
+              th Aperçu
+              th Titre
+              th Catégorie
+              th Auteur
+              th Date de publication
+              th Statut
+              th(style="text-align:right") Actions
+          tbody#contents-tbody
+            each item in (contents || [])
+              tr.contents-row(data-category=item.category)
+                td
+                  input.ck-checkbox(type="checkbox")
+                td
+                  .contents-thumb
+                    img(src=item.imageUrl alt=item.title)
+                td
+                  .contents-title-cell
+                    span.contents-item-title= item.title
+                    if item.summary
+                      span.contents-item-sub= item.summary
+                td
+                  span.contents-cat-badge(class=item.badgeClass)= item.categoryLabel
+                td
+                  .contents-author-cell
+                    .contents-author-av(style="background:#dbeafe;color:#2563eb")= item.authorInitial
+                    .contents-author-info
+                      span= item.author
+                      span.contents-author-role= item.authorRole
+                td
+                  .contents-date-cell
+                    span= item.displayDate
+                    span.contents-date-hour= item.displayHour
+                td
+                  span.contents-status-badge(class=item.status)
+                    span.dot
+                    | #{item.statusLabel}
+                td
+                  .contents-actions-cell
+                    button.contents-action-btn.view(type="button")
+                      svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                        path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                        circle(cx="12" cy="12" r="3")
+                      | Voir
+                    button.contents-action-btn.edit(type="button")
+                      svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                        path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                        path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                      | Modifier
+                    button.contents-action-btn.delete(type="button" title="Supprimer")
+                      svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                        polyline(points="3 6 5 6 21 6")
+                        path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+
+            tr.contents-row(data-category="actualite")
+              td
+                input.ck-checkbox(type="checkbox")
+              td
+                .contents-thumb
+                  img(src="/img/logo_ecica.webp" alt="Ouverture")
+              td
+                .contents-title-cell
+                  span.contents-item-title Ouverture des Inscriptions 2024
+                  span.contents-item-sub Pour rejoindre la nouvelle année...
+              td
+                span.contents-cat-badge.cat-actu Actualité
+              td
+                .contents-author-cell
+                  .contents-author-av(style="background:#dbeafe;color:#2563eb") J
+                  .contents-author-info
+                    span Jean-Marc K.
+                    span.contents-author-role Administrateur
+              td
+                .contents-date-cell
+                  span 16 mai 2024
+                  span.contents-date-hour 10:34
+              td
+                span.contents-status-badge.published
+                  span.dot
+                  | Publié
+              td
+                .contents-actions-cell
+                  button.contents-action-btn.view(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                      circle(cx="12" cy="12" r="3")
+                    | Voir
+                  button.contents-action-btn.edit(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                      path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                    | Modifier
+                  button.contents-action-btn.delete(type="button" title="Supprimer")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      polyline(points="3 6 5 6 21 6")
+                      path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+
+            tr.contents-row(data-category="formation")
+              td
+                input.ck-checkbox(type="checkbox")
+              td
+                .contents-thumb
+                  img(src="/img/logo_ecica.webp" alt="Formation web")
+              td
+                .contents-title-cell
+                  span.contents-item-title Formation en développement web
+                  span.contents-item-sub Apprenez à créer des sites web modernes...
+              td
+                span.contents-cat-badge.cat-form Formation
+              td
+                .contents-author-cell
+                  .contents-author-av(style="background:#fef3c7;color:#b45309") N
+                  .contents-author-info
+                    span Nadia K.
+                    span.contents-author-role Administrateur
+              td
+                .contents-date-cell
+                  span 14 mai 2024
+                  span.contents-date-hour 8:00
+              td
+                span.contents-status-badge.published
+                  span.dot
+                  | Publié
+              td
+                .contents-actions-cell
+                  button.contents-action-btn.view(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                      circle(cx="12" cy="12" r="3")
+                    | Voir
+                  button.contents-action-btn.edit(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                      path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                    | Modifier
+                  button.contents-action-btn.delete(type="button" title="Supprimer")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      polyline(points="3 6 5 6 21 6")
+                      path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+
+            tr.contents-row(data-category="evenement")
+              td
+                input.ck-checkbox(type="checkbox")
+              td
+                .contents-thumb
+                  img(src="/img/logo_ecica.webp" alt="Journée")
+              td
+                .contents-title-cell
+                  span.contents-item-title Journée Portes Ouvertes
+                  span.contents-item-sub Venez à notre établissement le 8 février...
+              td
+                span.contents-cat-badge.cat-event Événement
+              td
+                .contents-author-cell
+                  .contents-author-av(style="background:#dcfce7;color:#15803d") A
+                  .contents-author-info
+                    span Alain O.
+                    span.contents-author-role Administrateur
+              td
+                .contents-date-cell
+                  span 13 mai 2024
+                  span.contents-date-hour 11:00
+              td
+                span.contents-status-badge.published
+                  span.dot
+                  | Publié
+              td
+                .contents-actions-cell
+                  button.contents-action-btn.view(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                      circle(cx="12" cy="12" r="3")
+                    | Voir
+                  button.contents-action-btn.edit(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                      path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                    | Modifier
+                  button.contents-action-btn.delete(type="button" title="Supprimer")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      polyline(points="3 6 5 6 21 6")
+                      path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+
+            tr.contents-row(data-category="annonce")
+              td
+                input.ck-checkbox(type="checkbox")
+              td
+                .contents-thumb
+                  img(src="/img/logo_ecica.webp" alt="Bourses")
+              td
+                .contents-title-cell
+                  span.contents-item-title Bourses d'Études 2024
+                  span.contents-item-sub Profitez des opportunités de bourses...
+              td
+                span.contents-cat-badge.cat-annonce Annonce
+              td
+                .contents-author-cell
+                  .contents-author-av(style="background:#dbeafe;color:#2563eb") J
+                  .contents-author-info
+                    span Jean-Marc K.
+                    span.contents-author-role Administrateur
+              td
+                .contents-date-cell
+                  span 10 oct 2024
+                  span.contents-date-hour 09:15
+              td
+                span.contents-status-badge.draft
+                  span.dot
+                  | Brouillon
+              td
+                .contents-actions-cell
+                  button.contents-action-btn.view(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                      circle(cx="12" cy="12" r="3")
+                    | Voir
+                  button.contents-action-btn.edit(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                      path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                    | Modifier
+                  button.contents-action-btn.delete(type="button" title="Supprimer")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      polyline(points="3 6 5 6 21 6")
+                      path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+
+            tr.contents-row(data-category="actualite")
+              td
+                input.ck-checkbox(type="checkbox")
+              td
+                .contents-thumb
+                  img(src="/img/logo_ecica.webp" alt="Réussite")
+              td
+                .contents-title-cell
+                  span.contents-item-title Réussir ses examens
+                  span.contents-item-sub Des conseils pratiques pour mieux réviser...
+              td
+                span.contents-cat-badge.cat-actu Actualité
+              td
+                .contents-author-cell
+                  .contents-author-av(style="background:#fef3c7;color:#b45309") N
+                  .contents-author-info
+                    span Nadia K.
+                    span.contents-author-role Administrateur
+              td
+                .contents-date-cell
+                  span 08 mai 2024
+                  span.contents-date-hour 09:15
+              td
+                span.contents-status-badge.published
+                  span.dot
+                  | Publié
+              td
+                .contents-actions-cell
+                  button.contents-action-btn.view(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                      circle(cx="12" cy="12" r="3")
+                    | Voir
+                  button.contents-action-btn.edit(type="button")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                      path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                    | Modifier
+                  button.contents-action-btn.delete(type="button" title="Supprimer")
+                    svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                      polyline(points="3 6 5 6 21 6")
+                      path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+
+      //- Pagination
+      .contents-pagination-bar
+        span.contents-pag-info Affichage de 1 à 5 sur 56 publications
+        .contents-pag-controls
+          button.contents-pag-btn(type="button" disabled)
+            svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              polyline(points="15 18 9 12 15 6")
+          button.contents-pag-btn.active(type="button") 1
+          button.contents-pag-btn(type="button") 2
+          button.contents-pag-btn(type="button") 3
+          span.contents-pag-ellipsis ...
+          button.contents-pag-btn(type="button") 11
+          button.contents-pag-btn.next(type="button")
+            | Suivant
+            svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              polyline(points="9 18 15 12 9 6")
+
+    //- ── MODALE D'AJOUT D'UN CONTENU ───────────────────────────────────────
+    #modal-create-content.admin-modal-backdrop(style="display: none;")
+      .admin-modal-dialog.content-modal-dialog
+        .admin-modal-header
+          h3.admin-modal-title Ajouter un nouveau contenu
+          button.admin-modal-close(type="button", aria-label="Fermer") &times;
+        form#form-create-content(method="POST", action="/admin/contents", enctype="multipart/form-data")
+          .admin-modal-body
+            .modal-alert(style="display: none;")
+            .form-grid
+              .form-field
+                label(for="content-title") Titre *
+                input#content-title(type="text", name="title", maxlength="200", placeholder="Ex: Ouverture des inscriptions 2026", required)
+              .form-row-2
+                .form-field
+                  label(for="content-category") Catégorie *
+                  select#content-category(name="category", required)
+                    option(value="actualite", selected) Actualité
+                    option(value="formation") Formation
+                    option(value="evenement") Événement
+                    option(value="annonce") Annonce
+                .form-field
+                  label(for="content-status") Statut
+                  select#content-status(name="status")
+                    option(value="published", selected) Publié
+                    option(value="draft") Brouillon
+              .form-field
+                label(for="content-published-at") Date de publication
+                input#content-published-at(type="datetime-local", name="published_at")
+              .form-field
+                label(for="content-summary") Résumé
+                input#content-summary(type="text", name="summary", maxlength="255", placeholder="Courte description affichée dans la liste")
+              .form-field
+                label(for="content-body") Contenu
+                textarea#content-body(name="body", rows="6", placeholder="Rédigez le contenu de la publication...")
+              .form-field
+                label(for="content-image") Image de couverture
+                input#content-image(type="file", name="image", accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif")
+                span.form-hint Formats : PNG, JPG, WEBP, GIF — 5 Mo max.
+                img#content-image-preview.content-image-preview(alt="Aperçu de l'image", style="display: none;")
+          .admin-modal-footer
+            button.btn-modal-cancel(type="button") Annuler
+            button.btn-modal-submit(type="submit")
+              span.btn-text Enregistrer le contenu
+              span.btn-spinner(style="display: none;") ⏳ Enregistrement...
+
+block scripts
+  script.
+    function filterContents(cat, btn) {
+      document.querySelectorAll('.cft-tab').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.contents-row').forEach(function(row) {
+        row.style.display = (cat === 'tous' || row.getAttribute('data-category') === cat) ? '' : 'none';
+      });
+      updatePagInfo();
+    }
+    function searchContents(query) {
+      var term = (query || '').toLowerCase().trim();
+      document.querySelectorAll('.contents-row').forEach(function(row) {
+        var t = (row.querySelector('.contents-item-title')||{}).textContent||'';
+        var s = (row.querySelector('.contents-item-sub')||{}).textContent||'';
+        var c = (row.querySelector('.contents-cat-badge')||{}).textContent||'';
+        row.style.display = (!term || t.toLowerCase().includes(term) || s.toLowerCase().includes(term) || c.toLowerCase().includes(term)) ? '' : 'none';
+      });
+      updatePagInfo();
+    }
+    function toggleAllContents(master) {
+      document.querySelectorAll('#contents-tbody .ck-checkbox').forEach(function(c) { c.checked = master.checked; });
+    }
+    function updatePagInfo() {
+      var visible = document.querySelectorAll('.contents-row:not([style*="display: none"])').length;
+      var info = document.querySelector('.contents-pag-info');
+      if (info) info.textContent = 'Affichage de 1 à ' + visible + ' sur 56 publications';
+    }

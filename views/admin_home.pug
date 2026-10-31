@@ -1,0 +1,373 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    //- GREETING & DATE PICKER
+    .dashboard-header
+      .greeting-block
+        h2.greeting-title= "Bonjour, " + ((user && user.name) ? user.name.split(" ")[0] : ((user && user.login) ? user.login.split("@")[0] : "Administrateur")) + " 👋"
+        p.greeting-subtitle= "Connecté en tant que " + ((user && (user.email || user.login)) ? (user.email || user.login) : "admin") + " • Session active"
+
+      button.date-filter-btn(type="button")
+        svg(width="16", height="16", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+          rect(x="3", y="4", width="18", height="18", rx="2", ry="2")
+          line(x1="16", y1="2", x2="16", y2="6")
+          line(x1="8", y1="2", x2="8", y2="6")
+          line(x1="3", y1="10", x2="21", y2="10")
+        span 13 mai – 19 mai 2024
+        svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+          polyline(points="6 9 12 15 18 9")
+
+    //- 5 KPI METRICS
+    .kpi-grid
+      //- KPI 1
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.blue
+            svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              path(d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2")
+              circle(cx="8.5", cy="7", r="4")
+              line(x1="20", y1="8", x2="20", y2="14")
+              line(x1="23", y1="11", x2="17", y2="11")
+          .kpi-info
+            span.kpi-title Nouveaux prospects
+            span.kpi-value 24
+        .kpi-trend
+          span.trend-positive ↗ +33%
+          span.trend-label vs semaine précédente
+
+      //- KPI 2
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.teal
+            svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              path(d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z")
+          .kpi-info
+            span.kpi-title À relancer
+            span.kpi-value 18
+        .kpi-trend
+          span.trend-warning ↘ +8%
+          span.trend-label vs semaine précédente
+
+      //- KPI 3
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.purple
+            svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              rect(x="3", y="4", width="18", height="18", rx="2", ry="2")
+              line(x1="16", y1="2", x2="16", y2="6")
+              line(x1="8", y1="2", x2="8", y2="6")
+              line(x1="3", y1="10", x2="21", y2="10")
+          .kpi-info
+            span.kpi-title Rendez-vous à venir
+            span.kpi-value 12
+        .kpi-trend
+          span.trend-positive ↗ +20%
+          span.trend-label vs semaine précédente
+
+      //- KPI 4
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.coral
+            svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              circle(cx="12", cy="12", r="10")
+              circle(cx="12", cy="12", r="6")
+              circle(cx="12", cy="12", r="2")
+          .kpi-info
+            span.kpi-title Opportunités
+            span.kpi-value 37
+        .kpi-trend
+          span.trend-positive ↗ +15%
+          span.trend-label vs semaine précédente
+
+      //- KPI 5
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.cyan
+            svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              path(d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z")
+          .kpi-info
+            span.kpi-title Projets actifs
+            span.kpi-value 16
+        .kpi-trend
+          span.trend-positive ↗ +6%
+          span.trend-label vs semaine précédente
+
+    //- MIDDLE SECTION: PIPELINE + SOURCES
+    .middle-grid
+      //- PIPELINE COMMERCIAL
+      .dashboard-card
+        .card-header-flex
+          h3.card-title Pipeline commercial
+          button.select-filter-btn(type="button")
+            span Tous les pipelines
+            svg(width="14", height="14", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              polyline(points="6 9 12 15 18 9")
+
+        .funnel-container
+          .funnel-step.step-1
+            span.funnel-step-name Nouveau
+            span.funnel-step-count 58
+            span.funnel-step-label Leads
+
+          .funnel-step.step-2
+            span.funnel-step-name Qualification
+            span.funnel-step-count 32
+            span.funnel-step-label Leads
+
+          .funnel-step.step-3
+            span.funnel-step-name Proposition
+            span.funnel-step-count 17
+            span.funnel-step-label Leads
+
+          .funnel-step.step-4
+            span.funnel-step-name Négociation
+            span.funnel-step-count 9
+            span.funnel-step-label Leads
+
+          .funnel-step.step-5
+            span.funnel-step-name Gagné
+            span.funnel-step-count 6
+            span.funnel-step-label Leads
+
+        .pipeline-summary-bar
+          .pipeline-summary-item
+            span.pipeline-metric-label Valeur totale
+            span.pipeline-metric-val.primary-highlight 1 245 000 000 FCFA
+
+          .pipeline-summary-item
+            span.pipeline-metric-label Taux de conversion
+            span.pipeline-metric-val 10,3 %
+
+          .pipeline-summary-item
+            span.pipeline-metric-label Durée moyenne du cycle
+            span.pipeline-metric-val 32 jours
+
+      //- SOURCES DES PROSPECTS
+      .dashboard-card
+        .card-header-flex
+          h3.card-title Sources des prospects
+
+        .donut-section
+          .donut-chart-wrap
+            svg.donut-svg(viewBox="0 0 42 42")
+              //- Circumference = 2 * PI * 15.9155 = 100
+              circle(cx="21", cy="21", r="15.91549430918954", fill="transparent", stroke="#e2e8f0", stroke-width="6.5")
+              //- Site web: 42% (blue)
+              circle(cx="21", cy="21", r="15.91549430918954", fill="transparent", stroke="#2563eb", stroke-width="6.5", stroke-dasharray="42 58", stroke-dashoffset="0")
+              //- Réseaux sociaux: 24% (teal)
+              circle(cx="21", cy="21", r="15.91549430918954", fill="transparent", stroke="#10b981", stroke-width="6.5", stroke-dasharray="24 76", stroke-dashoffset="-42")
+              //- Recommandations: 16% (purple)
+              circle(cx="21", cy="21", r="15.91549430918954", fill="transparent", stroke="#8b5cf6", stroke-width="6.5", stroke-dasharray="16 84", stroke-dashoffset="-66")
+              //- Événements: 10% (amber)
+              circle(cx="21", cy="21", r="15.91549430918954", fill="transparent", stroke="#f59e0b", stroke-width="6.5", stroke-dasharray="10 90", stroke-dashoffset="-82")
+              //- Autres: 8% (slate)
+              circle(cx="21", cy="21", r="15.91549430918954", fill="transparent", stroke="#94a3b8", stroke-width="6.5", stroke-dasharray="8 92", stroke-dashoffset="-92")
+            .donut-center-text
+              span.donut-center-label Total
+              span.donut-center-number 156
+
+          .donut-legend
+            .legend-item
+              .legend-left
+                span.legend-dot(style="background-color: #2563eb;")
+                span Site web
+              span.legend-pct 42%
+
+            .legend-item
+              .legend-left
+                span.legend-dot(style="background-color: #10b981;")
+                span Réseaux sociaux
+              span.legend-pct 24%
+
+            .legend-item
+              .legend-left
+                span.legend-dot(style="background-color: #8b5cf6;")
+                span Recommandations
+              span.legend-pct 16%
+
+            .legend-item
+              .legend-left
+                span.legend-dot(style="background-color: #f59e0b;")
+                span Événements
+              span.legend-pct 10%
+
+            .legend-item
+              .legend-left
+                span.legend-dot(style="background-color: #94a3b8;")
+                span Autres
+              span.legend-pct 8%
+
+        a.card-footer-link(href="#") Voir le rapport complet &rarr;
+
+    //- BOTTOM SECTION: ACTIVITÉ + RENDEZ-VOUS + TÂCHES
+    .bottom-grid
+      //- COL 1: ACTIVITÉ RÉCENTE
+      .dashboard-card
+        .card-header-flex
+          h3.card-title Activité récente
+          a.card-action-link(href="#") Voir tout
+
+        .activity-list
+          .activity-item
+            .activity-icon-wrap
+              svg(width="18", height="18", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                path(d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2")
+                circle(cx="8.5", cy="7", r="4")
+            .activity-content
+              .activity-title Nouveau prospect ajouté
+              .activity-subtitle TechWest SARL
+            .activity-time Aujourd'hui<br>10:24
+
+          .activity-item
+            .activity-icon-wrap
+              svg(width="18", height="18", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                rect(x="3", y="4", width="18", height="18", rx="2", ry="2")
+                line(x1="16", y1="2", x2="16", y2="6")
+                line(x1="8", y1="2", x2="8", y2="6")
+                line(x1="3", y1="10", x2="21", y2="10")
+            .activity-content
+              .activity-title Rendez-vous planifié
+              .activity-subtitle Discussion projet ERP
+            .activity-time Aujourd'hui<br>09:15
+
+          .activity-item
+            .activity-icon-wrap
+              svg(width="18", height="18", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                path(d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z")
+                polyline(points="22,6 12,13 2,6")
+            .activity-content
+              .activity-title Nouvelle demande de projet
+              .activity-subtitle Site web institutionnel
+            .activity-time Hier<br>16:40
+
+          .activity-item
+            .activity-icon-wrap.green
+              svg(width="18", height="18", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                circle(cx="12", cy="12", r="10")
+                circle(cx="12", cy="12", r="6")
+                circle(cx="12", cy="12", r="2")
+            .activity-content
+              .activity-title Opportunité gagnée
+              .activity-subtitle Migration infrastructure cloud
+            .activity-time Hier<br>11:30
+
+          .activity-item
+            .activity-icon-wrap
+              svg(width="18", height="18", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+                path(d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z")
+            .activity-content
+              .activity-title Projet mis à jour
+              .activity-subtitle Développement application mobile
+            .activity-time 17 mai 2024<br>14:22
+
+        a.card-bottom-center-link(href="#") Voir toute l'activité &rarr;
+
+      //- COL 2: RENDEZ-VOUS À VENIR
+      .dashboard-card
+        .card-header-flex
+          h3.card-title Rendez-vous à venir
+          a.card-action-link(href="#") Voir tout
+
+        .meeting-list
+          .meeting-item
+            .meeting-date-badge
+              .meeting-month MAI
+              .meeting-day 20
+            .meeting-info
+              .meeting-title Présentation solution CRM
+              .meeting-meta SIFCA CI &bull; 10:00 - 11:00
+            span.meeting-status-tag.planned Planifié
+
+          .meeting-item
+            .meeting-date-badge
+              .meeting-month MAI
+              .meeting-day 20
+            .meeting-info
+              .meeting-title Atelier découverte
+              .meeting-meta Global Trade SA &bull; 14:00 - 15:30
+            span.meeting-status-tag.planned Planifié
+
+          .meeting-item
+            .meeting-date-badge
+              .meeting-month MAI
+              .meeting-day 21
+            .meeting-info
+              .meeting-title Suivi proposition
+              .meeting-meta TechWest SARL &bull; 09:30 - 10:00
+            span.meeting-status-tag.confirmed Confirmé
+
+          .meeting-item
+            .meeting-date-badge
+              .meeting-month MAI
+              .meeting-day 22
+            .meeting-info
+              .meeting-title Présentation avant-projet
+              .meeting-meta AfrikHousing &bull; 11:00 - 12:00
+            span.meeting-status-tag.confirmed Confirmé
+
+          .meeting-item
+            .meeting-date-badge
+              .meeting-month MAI
+              .meeting-day 23
+            .meeting-info
+              .meeting-title Réunion de cadrage
+              .meeting-meta Ministère de l'Économie &bull; 10:00 - 11:30
+            span.meeting-status-tag.planned Planifié
+
+        a.card-bottom-center-link(href="#") Voir tous les rendez-vous &rarr;
+
+      //- COL 3: TÂCHES
+      .dashboard-card
+        .card-header-flex
+          h3.card-title Tâches
+          a.card-action-link(href="#") Voir tout
+
+        .tasks-stat-row
+          .task-stat-box
+            .task-stat-label À faire
+            .task-stat-count.blue 14
+          .task-stat-box
+            .task-stat-label En cours
+            .task-stat-count.amber 7
+          .task-stat-box
+            .task-stat-label Terminées
+            .task-stat-count.green 23
+
+        .task-list
+          .task-item
+            input.task-checkbox(type="checkbox")
+            .task-info
+              .task-title Relancer prospect SIFCA CI
+              .task-due Aujourd'hui
+            span.priority-tag.high Haute
+
+          .task-item
+            input.task-checkbox(type="checkbox")
+            .task-info
+              .task-title Préparer proposition commerciale
+              .task-due Demain
+            span.priority-tag.medium Moyenne
+
+          .task-item
+            input.task-checkbox(type="checkbox")
+            .task-info
+              .task-title Envoyer étude de cas
+              .task-due 21 mai 2024
+            span.priority-tag.medium Moyenne
+
+          .task-item
+            input.task-checkbox(type="checkbox")
+            .task-info
+              .task-title Mettre à jour présentation
+              .task-due 22 mai 2024
+            span.priority-tag.low Basse
+
+          .task-item
+            input.task-checkbox(type="checkbox")
+            .task-info
+              .task-title Suivi après rendez-vous
+              .task-due 23 mai 2024
+            span.priority-tag.low Basse
+
+        a.card-bottom-center-link(href="#") Voir toutes les tâches &rarr;

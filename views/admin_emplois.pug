@@ -1,0 +1,827 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    //- TOP HEADER
+    .dashboard-header
+      .greeting-block
+        h2.greeting-title Gestion des Emplois du temps
+        p.greeting-subtitle Consultez, modifiez et téléchargez les emplois du temps de chaque classe (Word, PDF, Excel, Images).
+
+      button#btn-admin-add-edt.date-filter-btn(type="button" style="background: #2563eb; color: #fff; border: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 1px 3px rgba(37,99,235,0.3);")
+        svg(width="16", height="16", viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+          line(x1="12", y1="5", x2="12", y2="19")
+          line(x1="5", y1="12", x2="19", y2="12")
+        span Ajouter un emploi du temps
+
+    //- KPI CARDS
+    .kpi-grid(style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;")
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.blue
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              rect(x="3" y="4" width="18" height="18" rx="2" ry="2")
+              line(x1="16" y1="2" x2="16" y2="6")
+              line(x1="8" y1="2" x2="8" y2="6")
+              line(x1="3" y1="10" x2="21" y2="10")
+          .kpi-info
+            span.kpi-title Total Classes
+            span#kpi-total-classes.kpi-value= (classes ? classes.length : 0)
+        .kpi-trend
+          span.trend-positive Classes actives
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.blue(style="background: #eff6ff; color: #1e40af;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z")
+              polyline(points="14 2 14 8 20 8")
+              line(x1="9" y1="13" x2="15" y2="13")
+              line(x1="9" y1="17" x2="15" y2="17")
+          .kpi-info
+            span.kpi-title Fichiers Word
+            span#kpi-word-classes.kpi-value= (classes ? classes.filter(c => c.isWord).length : 0)
+        .kpi-trend
+          span.trend-positive Documents Word
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.purple(style="background: #fef2f2; color: #b91c1c;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z")
+              polyline(points="14 2 14 8 20 8")
+          .kpi-info
+            span.kpi-title Formats PDF
+            span#kpi-pdf-classes.kpi-value= (classes ? classes.filter(c => c.isPdf).length : 0)
+        .kpi-trend
+          span.trend-positive Documents PDF
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.teal(style="background: #f0fdf4; color: #15803d;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              rect(x="3" y="3" width="18" height="18" rx="2" ry="2")
+              line(x1="3" y1="9" x2="21" y2="9")
+              line(x1="9" y1="21" x2="9" y2="9")
+          .kpi-info
+            span.kpi-title Excel & Autres
+            span#kpi-other-classes.kpi-value= (classes ? classes.filter(c => c.isExcel || c.isImage).length : 0)
+        .kpi-trend
+          span.trend-positive Tableurs & Images
+
+    //- MAIN EMPLOIS DU TEMPS CONTAINER
+    .dashboard-card(style="margin-top: 24px; padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: visible;")
+      //- Search bar
+      .edt-search-box(style="position: relative; margin-bottom: 20px; width: 100%;")
+        svg.search-icon(width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none;")
+          circle(cx="11" cy="11" r="8")
+          line(x1="21" y1="21" x2="16.65" y2="16.65")
+        input#admin-edt-search.search-input(type="text" placeholder="Rechercher une classe, un format, une description..." autocomplete="off" style="width: 100%; height: 48px; padding-left: 46px; padding-right: 40px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.925rem; color: #1e293b; background: #fff; outline: none; box-sizing: border-box;")
+        button#admin-btn-clear-search(type="button" style="display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer;") &times;
+
+      //- Table
+      .table-responsive(style="border: 1px solid #f1f5f9; border-radius: 10px; overflow: visible;")
+        table.edt-table(style="width: 100%; border-collapse: collapse; text-align: left;")
+          thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
+            tr
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Classe
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Format
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Description
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569; text-align: right; padding-right: 40px;") Actions
+          tbody#admin-edt-tbody
+            if classes && classes.length
+              each item, index in classes
+                - const isBottomRow = index >= (classes.length - 3);
+                tr.admin-edt-row(data-name=item.name.toLowerCase() data-badge=item.badge.toLowerCase() data-desc=(item.description || "").toLowerCase() data-type=(item.fileTypeLabel || "").toLowerCase() data-id=item.id style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;")
+                  td(style="padding: 14px 20px; vertical-align: middle;")
+                    .class-identity(style="display: inline-flex; align-items: center; gap: 14px;")
+                      span.class-name(style="font-size: 0.925rem; font-weight: 600; color: #1e293b;")= item.name
+                  td(style="padding: 14px 20px; vertical-align: middle;")
+                    if item.isWord
+                      span(style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.775rem; font-weight: 600; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;")
+                        svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z")
+                          polyline(points="14 2 14 8 20 8")
+                        span= item.isDocx ? "Word (.docx)" : "Word (.doc)"
+                    else if item.isPdf
+                      span(style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.775rem; font-weight: 600; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;")
+                        svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z")
+                          polyline(points="14 2 14 8 20 8")
+                        span PDF
+                    else if item.isExcel
+                      span(style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.775rem; font-weight: 600; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;")
+                        svg(width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          rect(x="3" y="3" width="18" height="18" rx="2" ry="2")
+                        span Excel
+                    else if item.isImage
+                      span(style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.775rem; font-weight: 600; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff;") Image
+                    else
+                      span(style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.775rem; font-weight: 600; background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;") Document
+                  td(style="padding: 14px 20px; vertical-align: middle; color: #64748b; font-size: 0.9rem;")
+                    span= item.description || "—"
+                  td(style="padding: 14px 20px; vertical-align: middle; text-align: right;")
+                    .actions-wrap(style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px;")
+                      button.btn-action.btn-admin-preview(type="button" data-url=item.url data-name=item.name data-badge=item.badge data-color=(item.badgeColor || '#2563eb') data-is-word=(item.isWord ? "true" : "false") data-is-docx=(item.isDocx ? "true" : "false") data-is-pdf=(item.isPdf ? "true" : "false") data-is-excel=(item.isExcel ? "true" : "false") data-is-image=(item.isImage ? "true" : "false") style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; color: #2563eb; font-size: 0.825rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.15s;")
+                        svg(width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+                          path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                          circle(cx="12" cy="12" r="3")
+                        span Voir
+                      a.btn-action.btn-download(href=item.url download=item.name style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; color: #2563eb; font-size: 0.825rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.15s;")
+                        svg(width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+                          path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+                          polyline(points="7 10 12 15 17 10")
+                          line(x1="12" y1="15" x2="12" y2="3")
+                        span Télécharger
+                      .more-menu-wrap(class=(isBottomRow ? "dropup" : "") style="position: relative; display: inline-block;")
+                        button.btn-more(type="button" title="Plus d'actions" style="background: transparent; border: none; color: #64748b; padding: 6px 8px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;")
+                          svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+                            circle(cx="12" cy="12" r="1")
+                            circle(cx="12" cy="5" r="1")
+                            circle(cx="12" cy="19" r="1")
+                        .more-dropdown(style=`display: none; position: absolute; right: 0; ${isBottomRow ? 'bottom: 100%; margin-bottom: 6px;' : 'top: 100%; margin-top: 6px;'} background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.12); z-index: 9999; min-width: 200px; padding: 6px;`)
+                          button.dropdown-item.btn-admin-edit-row(type="button" data-id=item.id data-name=item.name data-desc=(item.description || "") style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #2563eb; cursor: pointer; border-radius: 6px;")
+                            svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                              path(d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z")
+                            span Modifier
+                          a.dropdown-item(href=item.url target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #334155; text-decoration: none; cursor: pointer; border-radius: 6px;")
+                            svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                              path(d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6")
+                              polyline(points="15 3 21 3 21 9")
+                              line(x1="10" y1="14" x2="21" y2="3")
+                            span Ouvrir nouvel onglet
+                          button.dropdown-item.btn-admin-copy-link(type="button" data-url=item.url style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #334155; cursor: pointer; border-radius: 6px;")
+                            svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                              rect(x="9" y="9" width="13" height="13" rx="2" ry="2")
+                              path(d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1")
+                            span Copier le lien direct
+                          button.dropdown-item.btn-admin-delete-row(type="button" data-id=item.id data-name=item.name style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #ef4444; cursor: pointer; border-radius: 6px;")
+                            svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                              polyline(points="3 6 5 6 21 6")
+                              path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+                            span Supprimer
+            else
+              tr
+                td(colspan="4" style="text-align: center; padding: 40px; color: #64748b;") Aucun emploi du temps configuré.
+
+      //- No Results Message
+      #admin-no-results(style="display: none; padding: 30px; text-align: center; color: #64748b; font-size: 0.95rem;")
+        p Aucune classe trouvée pour votre recherche.
+
+      //- Footer Count & Pagination
+      .edt-footer(style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 4px; flex-wrap: wrap; gap: 12px;")
+        .edt-count(style="color: #64748b; font-size: 0.875rem; font-weight: 500;")
+          span#admin-classes-count= `${classes ? classes.length : 0} classes`
+        .edt-pagination(style="display: flex; align-items: center; gap: 6px;")
+          button.page-btn(type="button" disabled style="min-width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; cursor: not-allowed;")
+            svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              polyline(points="15 18 9 12 15 6")
+          button.page-btn.active(type="button" style="min-width: 32px; height: 32px; border-radius: 8px; background: #2563eb; color: #fff; border: 1px solid #2563eb; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;") 1
+          button.page-btn(type="button" disabled style="min-width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; cursor: not-allowed;")
+            svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              polyline(points="9 18 15 12 9 6")
+
+  //- PREVIEW MODAL
+  #admin-modal-preview.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 92vw; max-width: 1000px; height: 85vh; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        .modal-title-wrap(style="display: flex; align-items: center; gap: 12px;")
+          h3#admin-modal-title(style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;") Emploi du temps
+        .modal-header-actions(style="display: flex; align-items: center; gap: 8px;")
+          a#admin-modal-open-newtab(href="#" target="_blank" title="Ouvrir dans un nouvel onglet" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;")
+            svg(width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6")
+              polyline(points="15 3 21 3 21 9")
+              line(x1="10" y1="14" x2="21" y2="3")
+          a#admin-modal-download-btn(href="#" download title="Télécharger" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;")
+            svg(width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+              polyline(points="7 10 12 15 17 10")
+              line(x1="12" y1="15" x2="12" y2="3")
+          button#admin-modal-close-btn(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+            svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              line(x1="18" y1="6" x2="6" y2="18")
+              line(x1="6" y1="6" x2="18" y2="18")
+      .modal-body(style="flex: 1; position: relative; overflow: auto; background: #f1f5f9; display: flex; flex-direction: column;")
+        #admin-modal-content-area(style="flex: 1; display: flex; flex-direction: column; height: 100%;")
+
+  //- ADD MODAL
+  #admin-modal-add.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 92vw; max-width: 540px; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        div
+          h3(style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;") Ajouter un emploi du temps
+          p(style="font-size: 0.775rem; color: #64748b; margin: 2px 0 0;") Formats : Word (.docx, .doc), PDF, Excel, Images
+        button#admin-modal-add-close(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+          svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="18" y1="6" x2="6" y2="18")
+            line(x1="6" y1="6" x2="18" y2="18")
+      form#admin-form-add-edt(style="padding: 20px; display: flex; flex-direction: column; gap: 16px;")
+        .form-group(style="display: flex; flex-direction: column; gap: 6px;")
+          label(style="font-size: 0.85rem; font-weight: 600; color: #334155;") Nom de la classe ou promotion *
+          input#admin-input-class-name(type="text" placeholder="Ex: 6e A, Terminale STI, BTS..." required style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+        .form-group(style="display: flex; flex-direction: column; gap: 6px;")
+          label(style="font-size: 0.85rem; font-weight: 600; color: #334155;") Description
+          input#admin-input-class-desc(type="text" placeholder="Ex: Année 2025-2026 - Semestre 1" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+        .form-group(style="display: flex; flex-direction: column; gap: 6px;")
+          label(style="font-size: 0.85rem; font-weight: 600; color: #334155;") Fichier d'emploi du temps (Word, PDF, Excel, Image) *
+          .file-dropzone#admin-dropzone(style="border: 2px dashed #93c5fd; border-radius: 10px; padding: 20px 16px; background-color: #f8fafc; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer;")
+            div(style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px;")
+              span(style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.725rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;") Word (.docx/.doc)
+              span(style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.725rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;") PDF
+              span(style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 0.725rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;") Excel
+              span(style="background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; font-size: 0.725rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;") Images
+            svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2")
+              path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+              polyline(points="17 8 12 3 7 8")
+              line(x1="12" y1="3" x2="12" y2="15")
+            p(style="margin: 8px 0 2px; font-size: 0.875rem; color: #334155;") Glissez-déposez votre fichier ici ou <span style="color: #2563eb; font-weight: 600; text-decoration: underline;">parcourez</span>
+            span(style="font-size: 0.75rem; color: #64748b;") Max. 30 Mo
+            input#admin-input-file(type="file" accept=".doc,.docx,.dot,.dotx,.pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*" required style="display:none;")
+            .file-selected-name#admin-file-selected-name(style="display:none; margin-top: 10px; font-size: 0.825rem; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 6px 12px; border-radius: 6px; width: 100%; box-sizing: border-box; text-align: left;")
+        .modal-form-actions(style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;")
+          button#admin-btn-cancel-add(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 16px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
+          button#admin-btn-submit-add(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Enregistrer
+
+  //- EDIT MODAL
+  #admin-modal-edit.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 92vw; max-width: 540px; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        div
+          h3(style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;") Modifier l'emploi du temps
+          p(style="font-size: 0.775rem; color: #64748b; margin: 2px 0 0;") Mettre à jour les informations ou remplacer le fichier
+        button#admin-modal-edit-close(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+          svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="18" y1="6" x2="6" y2="18")
+            line(x1="6" y1="6" x2="18" y2="18")
+      form#admin-form-edit-edt(style="padding: 20px; display: flex; flex-direction: column; gap: 16px;")
+        input#admin-edit-input-id(type="hidden")
+        .form-group(style="display: flex; flex-direction: column; gap: 6px;")
+          label(style="font-size: 0.85rem; font-weight: 600; color: #334155;") Nom de la classe ou promotion *
+          input#admin-edit-input-name(type="text" placeholder="Ex: 6e A, Terminale STI..." required style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+        .form-group(style="display: flex; flex-direction: column; gap: 6px;")
+          label(style="font-size: 0.85rem; font-weight: 600; color: #334155;") Description
+          input#admin-edit-input-desc(type="text" placeholder="Ex: Année 2025-2026 - Semestre 1" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+        .form-group(style="display: flex; flex-direction: column; gap: 6px;")
+          label(style="font-size: 0.85rem; font-weight: 600; color: #334155;") Remplacer le fichier (Optionnel)
+          .file-dropzone#admin-edit-dropzone(style="border: 2px dashed #93c5fd; border-radius: 10px; padding: 16px; background-color: #f8fafc; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer;")
+            svg(width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2")
+              path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+              polyline(points="17 8 12 3 7 8")
+              line(x1="12" y1="3" x2="12" y2="15")
+            p(style="margin: 6px 0 2px; font-size: 0.825rem; color: #334155;") Cliquez pour sélectionner un nouveau fichier
+            span(style="font-size: 0.725rem; color: #64748b;") Laissez vide pour conserver le document actuel
+            input#admin-edit-input-file(type="file" accept=".doc,.docx,.dot,.dotx,.pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*" style="display:none;")
+            .file-selected-name#admin-edit-file-selected-name(style="display:none; margin-top: 8px; font-size: 0.825rem; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 6px 12px; border-radius: 6px; width: 100%; box-sizing: border-box; text-align: left;")
+        .modal-form-actions(style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;")
+          button#admin-btn-cancel-edit(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 16px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
+          button#admin-btn-submit-edit(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Mettre à jour
+
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js")
+  script(src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js")
+  script.
+    (function () {
+      const palette = ["#2563eb", "#0d9488", "#7c3aed", "#f97316", "#0284c7", "#db2777", "#3730a3", "#16a34a", "#d97706", "#4f46e5"];
+
+      const searchInput = document.getElementById("admin-edt-search");
+      const btnClear = document.getElementById("admin-btn-clear-search");
+      const noResults = document.getElementById("admin-no-results");
+      const countLabel = document.getElementById("admin-classes-count");
+      const kpiTotal = document.getElementById("kpi-total-classes");
+
+      function filterRows() {
+        const query = (searchInput.value || "").trim().toLowerCase();
+        const rows = document.querySelectorAll(".admin-edt-row");
+        let visible = 0;
+
+        if (btnClear) btnClear.style.display = query.length > 0 ? "block" : "none";
+
+        rows.forEach(r => {
+          const name = r.getAttribute("data-name") || "";
+          const badge = r.getAttribute("data-badge") || "";
+          const desc = r.getAttribute("data-desc") || "";
+          const type = r.getAttribute("data-type") || "";
+
+          if (name.includes(query) || badge.includes(query) || desc.includes(query) || type.includes(query)) {
+            r.style.display = "";
+            visible++;
+          } else {
+            r.style.display = "none";
+          }
+        });
+
+        if (countLabel) countLabel.textContent = `${visible} classe${visible > 1 ? "s" : ""}`;
+        if (noResults) noResults.style.display = visible === 0 ? "block" : "none";
+      }
+
+      if (searchInput) searchInput.addEventListener("input", filterRows);
+      if (btnClear) {
+        btnClear.addEventListener("click", () => {
+          searchInput.value = "";
+          filterRows();
+          searchInput.focus();
+        });
+      }
+
+      // Preview Modal
+      const modalPreview = document.getElementById("admin-modal-preview");
+      const modalTitle = document.getElementById("admin-modal-title");
+      const modalOpenNewtab = document.getElementById("admin-modal-open-newtab");
+      const modalDownloadBtn = document.getElementById("admin-modal-download-btn");
+      const modalCloseBtn = document.getElementById("admin-modal-close-btn");
+      const modalContentArea = document.getElementById("admin-modal-content-area");
+
+      function openAdminPreview(item) {
+        modalTitle.textContent = `Emploi du temps - ${item.name}`;
+        modalOpenNewtab.href = item.url;
+        modalDownloadBtn.href = item.url;
+        modalDownloadBtn.setAttribute("download", item.name);
+
+        modalContentArea.innerHTML = "";
+        modalPreview.style.display = "flex";
+        document.body.style.overflow = "hidden";
+
+        const url = item.url;
+        const isWord = item.isWord === "true" || /\.(docx|doc|dotx|dot)$/i.test(url);
+        const isDocx = item.isDocx === "true" || /\.docx$/i.test(url);
+        const isPdf = item.isPdf === "true" || /\.pdf$/i.test(url);
+        const isExcel = item.isExcel === "true" || /\.(xlsx|xls|csv|ods)$/i.test(url);
+        const isImg = item.isImage === "true" || /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(url);
+
+        if (isDocx && typeof mammoth !== "undefined") {
+          fetch(url)
+            .then(res => res.arrayBuffer())
+            .then(buf => mammoth.convertToHtml({ arrayBuffer: buf }))
+            .then(result => {
+              const wrap = document.createElement("div");
+              wrap.style.cssText = "flex: 1; padding: 24px; overflow-y: auto; background: #f1f5f9; display: flex; justify-content: center;";
+              wrap.innerHTML = `
+                <div style="width: 100%; max-width: 800px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-radius: 8px; padding: 36px 40px; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">
+                  <div style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:#1e40af;">Document Word (.docx)</span>
+                    <a href="${url}" download style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:600; text-decoration:none;">Télécharger</a>
+                  </div>
+                  <div>${result.value || "<p>Document vide.</p>"}</div>
+                </div>
+              `;
+              modalContentArea.appendChild(wrap);
+            })
+            .catch(() => renderAdminFallback(url, item.name, "Word (.docx)"));
+        } else if (isWord) {
+          renderAdminFallback(url, item.name, "Document Microsoft Word (.doc)");
+        } else if (isPdf) {
+          const iframe = document.createElement("iframe");
+          iframe.style.cssText = "width:100%;height:100%;border:none;background:#fff;flex:1;";
+          iframe.src = url;
+          modalContentArea.appendChild(iframe);
+        } else if (isExcel && typeof XLSX !== "undefined") {
+          fetch(url)
+            .then(res => res.arrayBuffer())
+            .then(buf => {
+              const wb = XLSX.read(buf, { type: "array" });
+              const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: "" });
+              const table = document.createElement("table");
+              table.style.cssText = "width:100%;border-collapse:collapse;font-size:0.8rem;background:#fff;";
+              rows.forEach((row, rIdx) => {
+                const tr = document.createElement("tr");
+                row.forEach(val => {
+                  const cell = document.createElement(rIdx === 0 ? "th" : "td");
+                  cell.style.cssText = "border:1px solid #e2e8f0;padding:6px 10px;";
+                  cell.textContent = String(val);
+                  tr.appendChild(cell);
+                });
+                table.appendChild(tr);
+              });
+              const wrap = document.createElement("div");
+              wrap.style.cssText = "overflow:auto;flex:1;padding:16px;background:#fff;";
+              wrap.appendChild(table);
+              modalContentArea.appendChild(wrap);
+            })
+            .catch(() => renderAdminFallback(url, item.name, "Classeur Excel"));
+        } else if (isImg) {
+          const img = document.createElement("img");
+          img.src = url;
+          img.style.cssText = "max-width:100%;max-height:100%;object-fit:contain;margin:auto;display:block;";
+          modalContentArea.appendChild(img);
+        } else {
+          renderAdminFallback(url, item.name, "Document");
+        }
+      }
+
+      function renderAdminFallback(url, name, typeLabel) {
+        modalContentArea.innerHTML = `
+          <div style="margin:auto;text-align:center;padding:40px 24px;background:#fff;border-radius:12px;max-width:440px;box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+            <h4 style="margin:0 0 8px;font-size:1.15rem;color:#0f172a;">${name}</h4>
+            <p style="margin:0 0 16px;color:#64748b;font-size:0.9rem;">${typeLabel} prêt à être téléchargé.</p>
+            <a href="${url}" download style="background:#2563eb;color:#fff;padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Télécharger le document</a>
+          </div>
+        `;
+      }
+
+      function closeAdminPreview() {
+        modalPreview.style.display = "none";
+        modalContentArea.innerHTML = "";
+        document.body.style.overflow = "";
+      }
+
+      if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeAdminPreview);
+      modalPreview.querySelector(".modal-overlay").addEventListener("click", closeAdminPreview);
+
+      // Global click handler
+      document.addEventListener("click", function (e) {
+        const prevBtn = e.target.closest(".btn-admin-preview");
+        if (prevBtn) {
+          openAdminPreview({
+            url: prevBtn.getAttribute("data-url"),
+            name: prevBtn.getAttribute("data-name"),
+            badge: prevBtn.getAttribute("data-badge"),
+            color: prevBtn.getAttribute("data-color"),
+            isWord: prevBtn.getAttribute("data-is-word"),
+            isDocx: prevBtn.getAttribute("data-is-docx"),
+            isPdf: prevBtn.getAttribute("data-is-pdf"),
+            isExcel: prevBtn.getAttribute("data-is-excel"),
+            isImage: prevBtn.getAttribute("data-is-image")
+          });
+        }
+
+        const editBtn = e.target.closest(".btn-admin-edit-row");
+        if (editBtn) {
+          const id = editBtn.getAttribute("data-id");
+          const name = editBtn.getAttribute("data-name");
+          const desc = editBtn.getAttribute("data-desc");
+
+          document.getElementById("admin-edit-input-id").value = id;
+          document.getElementById("admin-edit-input-name").value = name || "";
+          document.getElementById("admin-edit-input-desc").value = (desc && desc !== "—") ? desc : "";
+          
+          const fileSelectedEdit = document.getElementById("admin-edit-file-selected-name");
+          if (fileSelectedEdit) {
+            fileSelectedEdit.textContent = "";
+            fileSelectedEdit.style.display = "none";
+          }
+          if (fileEditInput) fileEditInput.value = "";
+
+          modalEdit.style.display = "flex";
+          document.body.style.overflow = "hidden";
+          document.getElementById("admin-edit-input-name").focus();
+          document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
+        }
+
+        const copyBtn = e.target.closest(".btn-admin-copy-link");
+        if (copyBtn) {
+          const u = window.location.origin + copyBtn.getAttribute("data-url");
+          navigator.clipboard.writeText(u);
+          alert("Lien direct copié dans le presse-papier !");
+          document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
+        }
+
+        const delBtn = e.target.closest(".btn-admin-delete-row");
+        if (delBtn) {
+          const id = delBtn.getAttribute("data-id") || delBtn.getAttribute("data-name");
+          const name = delBtn.getAttribute("data-name");
+          if (confirm(`Voulez-vous vraiment supprimer l'emploi du temps de "${name}" ?`)) {
+            fetch(`/admin/emplois/delete/${id}`, { method: "POST", headers: { "Accept": "application/json" } })
+              .then(res => res.json())
+              .then(data => {
+                const row = delBtn.closest(".admin-edt-row");
+                if (row) {
+                  row.remove();
+                  filterRows();
+                  if (kpiTotal) kpiTotal.textContent = document.querySelectorAll(".admin-edt-row").length;
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                alert("Erreur lors de la suppression.");
+              });
+          }
+          document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
+        }
+
+        const moreBtn = e.target.closest(".btn-more");
+        if (moreBtn) {
+          e.stopPropagation();
+          const menu = moreBtn.nextElementSibling;
+          if (menu) {
+            const isShown = menu.style.display === "block";
+            document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
+            menu.style.display = isShown ? "none" : "block";
+          }
+        } else if (!e.target.closest(".more-dropdown")) {
+          document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
+        }
+      });
+
+      // Add Modal
+      const modalAdd = document.getElementById("admin-modal-add");
+      const btnAdd = document.getElementById("btn-admin-add-edt");
+      const btnAddClose = document.getElementById("admin-modal-add-close");
+      const btnCancelAdd = document.getElementById("admin-btn-cancel-add");
+      const formAdd = document.getElementById("admin-form-add-edt");
+      const dropzone = document.getElementById("admin-dropzone");
+      const fileInput = document.getElementById("admin-input-file");
+      const fileSelectedName = document.getElementById("admin-file-selected-name");
+      const btnSubmitAdd = document.getElementById("admin-btn-submit-add");
+
+      if (btnAdd) {
+        btnAdd.addEventListener("click", () => {
+          modalAdd.style.display = "flex";
+          document.body.style.overflow = "hidden";
+          document.getElementById("admin-input-class-name").focus();
+        });
+      }
+
+      function closeAdminAdd() {
+        modalAdd.style.display = "none";
+        document.body.style.overflow = "";
+        formAdd.reset();
+        fileSelectedName.style.display = "none";
+        btnSubmitAdd.disabled = false;
+        btnSubmitAdd.textContent = "Enregistrer";
+      }
+
+      if (btnAddClose) btnAddClose.addEventListener("click", closeAdminAdd);
+      if (btnCancelAdd) btnCancelAdd.addEventListener("click", closeAdminAdd);
+      modalAdd.querySelector(".modal-overlay").addEventListener("click", closeAdminAdd);
+
+      if (dropzone && fileInput) {
+        dropzone.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", () => {
+          if (fileInput.files && fileInput.files[0]) {
+            fileSelectedName.textContent = `Fichier sélectionné : ${fileInput.files[0].name} (${(fileInput.files[0].size / 1024).toFixed(1)} Ko)`;
+            fileSelectedName.style.display = "block";
+
+            const nameInput = document.getElementById("admin-input-class-name");
+            if (!nameInput.value) {
+              nameInput.value = fileInput.files[0].name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+            }
+          }
+        });
+      }
+
+      // Edit Modal
+      const modalEdit = document.getElementById("admin-modal-edit");
+      const btnEditClose = document.getElementById("admin-modal-edit-close");
+      const btnCancelEdit = document.getElementById("admin-btn-cancel-edit");
+      const formEdit = document.getElementById("admin-form-edit-edt");
+      const dropzoneEdit = document.getElementById("admin-edit-dropzone");
+      const fileEditInput = document.getElementById("admin-edit-input-file");
+      const fileSelectedEditName = document.getElementById("admin-edit-file-selected-name");
+      const btnSubmitEdit = document.getElementById("admin-btn-submit-edit");
+
+      function closeAdminEdit() {
+        modalEdit.style.display = "none";
+        document.body.style.overflow = "";
+        formEdit.reset();
+        if (fileSelectedEditName) fileSelectedEditName.style.display = "none";
+        btnSubmitEdit.disabled = false;
+        btnSubmitEdit.textContent = "Mettre à jour";
+      }
+
+      if (btnEditClose) btnEditClose.addEventListener("click", closeAdminEdit);
+      if (btnCancelEdit) btnCancelEdit.addEventListener("click", closeAdminEdit);
+      if (modalEdit) modalEdit.querySelector(".modal-overlay").addEventListener("click", closeAdminEdit);
+
+      if (dropzoneEdit && fileEditInput) {
+        dropzoneEdit.addEventListener("click", () => fileEditInput.click());
+        fileEditInput.addEventListener("change", () => {
+          if (fileEditInput.files && fileEditInput.files[0]) {
+            fileSelectedEditName.textContent = `Nouveau fichier : ${fileEditInput.files[0].name} (${(fileEditInput.files[0].size / 1024).toFixed(1)} Ko)`;
+            fileSelectedEditName.style.display = "block";
+          }
+        });
+      }
+
+      if (formEdit) {
+        formEdit.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const id = document.getElementById("admin-edit-input-id").value;
+          const name = document.getElementById("admin-edit-input-name").value.trim();
+          const desc = document.getElementById("admin-edit-input-desc").value.trim() || "—";
+          const file = fileEditInput.files ? fileEditInput.files[0] : null;
+
+          if (!id || !name) return;
+
+          btnSubmitEdit.disabled = true;
+          btnSubmitEdit.textContent = "Mise à jour...";
+
+          const formData = new FormData();
+          formData.append("name", name);
+          formData.append("description", desc);
+          if (file) {
+            formData.append("file", file);
+          }
+
+          fetch(`/admin/emplois/edit/${id}`, {
+            method: "POST",
+            body: formData,
+            headers: { "Accept": "application/json" }
+          })
+          .then(res => {
+            if (!res.ok) return res.json().then(d => { throw new Error(d.error || "Erreur."); });
+            return res.json();
+          })
+          .then(data => {
+            const item = data.item;
+            const row = document.querySelector(`.admin-edt-row[data-id="${id}"]`);
+            if (row) {
+              row.setAttribute("data-name", item.name.toLowerCase());
+              row.setAttribute("data-badge", (item.badge || "").toLowerCase());
+              row.setAttribute("data-desc", (item.description || "").toLowerCase());
+              row.setAttribute("data-type", (item.fileTypeLabel || "").toLowerCase());
+
+              const nameEl = row.querySelector(".class-name");
+              if (nameEl) nameEl.textContent = item.name;
+
+              const descEl = row.querySelector("td:nth-child(3) span");
+              if (descEl) descEl.textContent = item.description || "—";
+
+              let formatPill = "";
+              if (item.isWord) {
+                formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><span>${item.isDocx ? "Word (.docx)" : "Word (.doc)"}</span></span>`;
+              } else if (item.isPdf) {
+                formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><span>PDF</span></span>`;
+              } else if (item.isExcel) {
+                formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg><span>Excel</span></span>`;
+              } else if (item.isImage) {
+                formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff;">Image</span>`;
+              } else {
+                formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;">Document</span>`;
+              }
+              const formatTd = row.querySelector("td:nth-child(2)");
+              if (formatTd) formatTd.innerHTML = formatPill;
+
+              const prevBtn = row.querySelector(".btn-admin-preview");
+              if (prevBtn) {
+                prevBtn.setAttribute("data-url", item.url);
+                prevBtn.setAttribute("data-name", item.name);
+                prevBtn.setAttribute("data-badge", item.badge);
+                prevBtn.setAttribute("data-color", item.badgeColor);
+                prevBtn.setAttribute("data-is-word", item.isWord ? "true" : "false");
+                prevBtn.setAttribute("data-is-docx", item.isDocx ? "true" : "false");
+                prevBtn.setAttribute("data-is-pdf", item.isPdf ? "true" : "false");
+                prevBtn.setAttribute("data-is-excel", item.isExcel ? "true" : "false");
+                prevBtn.setAttribute("data-is-image", item.isImage ? "true" : "false");
+              }
+
+              const dwnBtn = row.querySelector(".btn-download");
+              if (dwnBtn) {
+                dwnBtn.setAttribute("href", item.url);
+                dwnBtn.setAttribute("download", item.name);
+              }
+
+              const copyBtnEl = row.querySelector(".btn-admin-copy-link");
+              if (copyBtnEl) copyBtnEl.setAttribute("data-url", item.url);
+
+              const tabLink = row.querySelector("a.dropdown-item[target='_blank']");
+              if (tabLink) tabLink.setAttribute("href", item.url);
+
+              const editBtnEl = row.querySelector(".btn-admin-edit-row");
+              if (editBtnEl) {
+                editBtnEl.setAttribute("data-name", item.name);
+                editBtnEl.setAttribute("data-desc", item.description || "");
+              }
+
+              const delBtnEl = row.querySelector(".btn-admin-delete-row");
+              if (delBtnEl) delBtnEl.setAttribute("data-name", item.name);
+            }
+            closeAdminEdit();
+            filterRows();
+          })
+          .catch(err => {
+            alert(err.message || "Erreur lors de la mise à jour.");
+          })
+          .finally(() => {
+            btnSubmitEdit.disabled = false;
+            btnSubmitEdit.textContent = "Mettre à jour";
+          });
+        });
+      }
+
+      if (formAdd) {
+        formAdd.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("admin-input-class-name").value.trim();
+          const desc = document.getElementById("admin-input-class-desc").value.trim() || "—";
+          const file = fileInput.files[0];
+          if (!name || !file) return;
+
+          btnSubmitAdd.disabled = true;
+          btnSubmitAdd.textContent = "Enregistrement...";
+
+          const formData = new FormData();
+          formData.append("name", name);
+          formData.append("description", desc);
+          formData.append("file", file);
+
+          fetch("/admin/emplois/add", {
+            method: "POST",
+            body: formData,
+            headers: { "Accept": "application/json" }
+          })
+          .then(res => {
+            if (!res.ok) return res.json().then(d => { throw new Error(d.error || "Erreur."); });
+            return res.json();
+          })
+          .then(data => {
+            const item = data.item;
+            const tbody = document.getElementById("admin-edt-tbody");
+            const emptyRow = tbody.querySelector("td[colspan='4']");
+            if (emptyRow) emptyRow.closest("tr").remove();
+
+            let formatPill = "";
+            if (item.isWord) {
+              formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;">Word</span>`;
+            } else if (item.isPdf) {
+              formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">PDF</span>`;
+            } else if (item.isExcel) {
+              formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">Excel</span>`;
+            } else if (item.isImage) {
+              formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff;">Image</span>`;
+            } else {
+              formatPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.775rem;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;">Doc</span>`;
+            }
+
+            const tr = document.createElement("tr");
+            tr.className = "admin-edt-row";
+            tr.setAttribute("data-name", item.name.toLowerCase());
+            tr.setAttribute("data-badge", (item.badge || "").toLowerCase());
+            tr.setAttribute("data-desc", (item.description || "").toLowerCase());
+            tr.setAttribute("data-type", (item.fileTypeLabel || "").toLowerCase());
+            tr.setAttribute("data-id", item.id);
+            tr.style.cssText = "border-bottom: 1px solid #f1f5f9;";
+
+            tr.innerHTML = `
+              <td style="padding: 14px 20px; vertical-align: middle;">
+                <div class="class-identity" style="display: inline-flex; align-items: center; gap: 14px;">
+                  <span class="class-name" style="font-size: 0.925rem; font-weight: 600; color: #1e293b;">${item.name}</span>
+                </div>
+              </td>
+              <td style="padding: 14px 20px; vertical-align: middle;">${formatPill}</td>
+              <td style="padding: 14px 20px; vertical-align: middle; color: #64748b; font-size: 0.9rem;">
+                <span>${item.description || "—"}</span>
+              </td>
+              <td style="padding: 14px 20px; vertical-align: middle; text-align: right;">
+                <div class="actions-wrap" style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                  <button class="btn-action btn-admin-preview" type="button" data-url="${item.url}" data-name="${item.name}" data-badge="${item.badge}" data-color="${item.badgeColor}" data-is-word="${item.isWord}" data-is-docx="${item.isDocx}" data-is-pdf="${item.isPdf}" data-is-excel="${item.isExcel}" data-is-image="${item.isImage}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; color: #2563eb; font-size: 0.825rem; font-weight: 600; cursor: pointer; text-decoration: none;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span>Voir</span>
+                  </button>
+                  <a class="btn-action btn-download" href="${item.url}" download="${item.name}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; color: #2563eb; font-size: 0.825rem; font-weight: 600; cursor: pointer; text-decoration: none;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Télécharger</span>
+                  </a>
+                  <div class="more-menu-wrap dropup" style="position: relative; display: inline-block;">
+                    <button class="btn-more" type="button" title="Plus d'actions" style="background: transparent; border: none; color: #64748b; padding: 6px 8px; border-radius: 6px; cursor: pointer;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </button>
+                    <div class="more-dropdown" style="display: none; position: absolute; right: 0; bottom: 100%; margin-bottom: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.12); z-index: 9999; min-width: 200px; padding: 6px;">
+                      <button class="dropdown-item btn-admin-edit-row" type="button" data-id="${item.id}" data-name="${item.name}" data-desc="${item.description || ''}" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #2563eb; cursor: pointer; border-radius: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        <span>Modifier</span>
+                      </button>
+                      <a class="dropdown-item" href="${item.url}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #334155; text-decoration: none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        <span>Ouvrir nouvel onglet</span>
+                      </a>
+                      <button class="dropdown-item btn-admin-copy-link" type="button" data-url="${item.url}" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #334155;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span>Copier le lien direct</span>
+                      </button>
+                      <button class="dropdown-item btn-admin-delete-row" type="button" data-id="${item.id}" data-name="${item.name}" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; font-size: 0.825rem; color: #ef4444;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Supprimer</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            `;
+
+            tbody.appendChild(tr);
+            closeAdminAdd();
+            filterRows();
+            if (kpiTotal) kpiTotal.textContent = document.querySelectorAll(".admin-edt-row").length;
+          })
+          .catch(err => {
+            alert(err.message || "Erreur lors de l'enregistrement.");
+          })
+          .finally(() => {
+            btnSubmitAdd.disabled = false;
+            btnSubmitAdd.textContent = "Enregistrer";
+          });
+        });
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeAdminPreview();
+          closeAdminAdd();
+          closeAdminEdit();
+          document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
+        }
+      });
+    })();
