@@ -36,6 +36,8 @@ app.use(
           "data:",
           "blob:",
           "https://*.tile.openstreetmap.org",
+          "https://*.tile.openstreetmap.fr",
+          "https://*.basemaps.cartocdn.com",
           "https://unpkg.com",
           "https:",
         ],
@@ -46,6 +48,7 @@ app.use(
           process.env.NODE_ENV === "production" ? [] : null,
       },
     },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
