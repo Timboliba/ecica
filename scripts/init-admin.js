@@ -119,17 +119,20 @@ async function initAdminTable() {
     console.log("----------------------------------------------------");
 
     const defaultLogin =
+      process.env.ADMIN_EMAIL ||
       process.env.USER ||
       process.env.SEED_SUPER_ADMIN_EMAIL ||
       "ecica@gmail.com";
     const defaultEmail =
+      process.env.ADMIN_EMAIL ||
       process.env.USER ||
       process.env.SEED_SUPER_ADMIN_EMAIL ||
       "ecica@gmail.com";
     const defaultPassword =
+      process.env.ADMIN_PASSWORD ||
       process.env.PASSWORD ||
       process.env.SEED_SUPER_ADMIN_PASSWORD ||
-      "password ecica";
+      "Admin123!";
     const defaultName = "Administrateur ECICA";
     const defaultRole = "superadmin";
 

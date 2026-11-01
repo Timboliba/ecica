@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "init:admin": "node scripts/init-admin.js",
-    "init:emplois": "node scripts/init-emplois.js"
+    "init:emplois": "node scripts/init-emplois.js",
+    "reset:admin": "node scripts/reset-admin-password.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
