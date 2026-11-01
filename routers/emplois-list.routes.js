@@ -7,6 +7,8 @@ router.get("/", async (req, res, next) => {
     const classes = await emploisService.getAllEmplois();
     res.render("emploisList.pug", {
       pageTitle: "Emplois du temps - ECICA",
+      metaDescription: "Consultez les emplois du temps de toutes les classes de l'ECICA à Bamako, Mali.",
+      canonicalPath: "/Emplois",
       classes,
     });
   } catch (error) {

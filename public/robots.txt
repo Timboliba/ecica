@@ -1,0 +1,25 @@
+# Robots.txt — E.C.I.C.A (www.ecica.ml)
+# Contrôle d'accès des robots des moteurs de recherche
+
+# Autoriser tous les robots (Googlebot, Bingbot, etc.)
+User-agent: *
+Allow: /
+Allow: /Emplois/
+Allow: /Formation
+Allow: /presentation
+Allow: /contact
+Allow: /Liens
+
+# Protéger les zones privées et techniques
+Disallow: /admin/
+Disallow: /admin
+Disallow: /student/
+Disallow: /teacher/
+
+# Empêcher l'indexation des fichiers techniques
+Disallow: /*.json$
+Disallow: /uploads/
+
+# Adresse du plan du site pour une indexation optimale
+Sitemap: https://www.ecica.ml/sitemap.xml
+

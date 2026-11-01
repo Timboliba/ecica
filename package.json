@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "dev": "node --watch app.js",
     "init:admin": "node scripts/init-admin.js",
     "init:emplois": "node scripts/init-emplois.js",
     "reset:admin": "node scripts/reset-admin-password.js"

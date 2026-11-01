@@ -1,13 +1,75 @@
 doctype html
 html(lang="fr")
   head
-    title= pageTitle || "ECICA"
-    meta(name="description", content="ECICA - École Centrale pour l'Industrie, le Commerce et l'Administration")
+    //- === IDENTITÉ & TITRE ===
+    title= pageTitle || "ECICA - École Centrale pour l'Industrie, le Commerce et l'Administration"
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
+
+    //- === GOOGLE SEARCH CONSOLE VERIFICATION ===
+    meta(name="google-site-verification", content="f8668709433a2d72")
+
+    //- === SEO META ===
+    meta(name="description", content=metaDescription || "L'ECICA est une école privée de référence à Bamako, Mali, proposant des formations professionnelles en industrie, commerce, administration et informatique.")
+    meta(name="keywords", content=metaKeywords || "ECICA, école Bamako, formation professionnelle Mali, industrie commerce administration, lycée technique Bamako")
+    meta(name="author", content="E.C.I.C.A")
+    meta(name="robots", content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1")
+    meta(name="theme-color", content="#1e40af")
+
+    //- === CANONICAL ===
+    link(rel="canonical", href=`https://www.ecica.ml${canonicalPath || '/'}`)
+
+    //- === OPEN GRAPH ===
+    meta(property="og:type", content="website")
+    meta(property="og:site_name", content="E.C.I.C.A")
+    meta(property="og:title", content=pageTitle || "ECICA - École Centrale pour l'Industrie, le Commerce et l'Administration")
+    meta(property="og:description", content=metaDescription || "Formation professionnelle de qualité à Bamako, Mali.")
+    meta(property="og:url", content=`https://www.ecica.ml${canonicalPath || '/'}`)
+    meta(property="og:image", content="https://www.ecica.ml/img/logo_ecica.webp")
+    meta(property="og:image:width", content="1200")
+    meta(property="og:image:height", content="630")
+    meta(property="og:image:alt", content="Logo ECICA")
+    meta(property="og:locale", content="fr_ML")
+
+    //- === TWITTER CARD ===
+    meta(name="twitter:card", content="summary_large_image")
+    meta(name="twitter:title", content=pageTitle || "ECICA")
+    meta(name="twitter:description", content=metaDescription || "Formation professionnelle à Bamako, Mali.")
+    meta(name="twitter:image", content="https://www.ecica.ml/img/logo_ecica.webp")
+
+    //- === SCHEMA.ORG JSON-LD ===
+    script(type="application/ld+json").
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "E.C.I.C.A",
+        "alternateName": "École Centrale pour l'Industrie, le Commerce et l'Administration",
+        "url": "https://www.ecica.ml",
+        "logo": "https://www.ecica.ml/img/logo_ecica.webp",
+        "image": "https://www.ecica.ml/img/logo_ecica.webp",
+        "description": "Établissement d'enseignement privé à Bamako, Mali.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Bamako",
+          "addressCountry": "ML"
+        },
+        "sameAs": ["https://ecica.ml"],
+        "inLanguage": "fr"
+      }
+
+    //- === FAVICON ===
     link(rel="shortcut icon", href="/img/logo_ecica.webp", type="image/x-icon")
+    link(rel="apple-touch-icon", href="/img/logo_ecica.webp")
+
+    //- === PRELOAD ===
     link(rel="preload", as="image", href="/img/picture4.webp", fetchpriority="high")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin="anonymous")
+
+    //- === STYLES ===
     link(rel="stylesheet" href="/css/layout.css?v=2.2")
+    link(rel="stylesheet" href="/css/skeleton.css?v=1.0")
+    block styles
 
   body
     .main-container

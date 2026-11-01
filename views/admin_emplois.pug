@@ -340,7 +340,35 @@ block content
         modalDownloadBtn.href = item.url;
         modalDownloadBtn.setAttribute("download", item.name);
 
-        modalContentArea.innerHTML = "";
+        modalContentArea.innerHTML = `
+          <div class="skeleton-doc-container" style="flex:1;">
+            <div class="skeleton-doc-toolbar">
+              <div class="sk-line w-33" style="margin-bottom:0;"></div>
+              <div class="sk-btn" style="width:100px; height:30px;"></div>
+            </div>
+            <div class="skeleton-doc-paper">
+              <div class="sk-pill" style="margin-bottom:16px;"></div>
+              <div class="sk-line h-title w-50"></div>
+              <div class="sk-line w-80"></div>
+              <div class="sk-line w-65" style="margin-bottom:24px;"></div>
+              <div class="skeleton-doc-table-preview">
+                <div class="sk-table-head">
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                </div>
+                <div class="sk-table-row">
+                  <div class="sk-line w-33" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-50" style="margin-bottom:0;"></div>
+                </div>
+                <div class="sk-table-row">
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-65" style="margin-bottom:0;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
         modalPreview.style.display = "flex";
         document.body.style.overflow = "hidden";
 
@@ -367,6 +395,7 @@ block content
                   <div>${result.value || "<p>Document vide.</p>"}</div>
                 </div>
               `;
+              modalContentArea.innerHTML = "";
               modalContentArea.appendChild(wrap);
             })
             .catch(() => renderAdminFallback(url, item.name, "Word (.docx)"));
@@ -376,6 +405,7 @@ block content
           const iframe = document.createElement("iframe");
           iframe.style.cssText = "width:100%;height:100%;border:none;background:#fff;flex:1;";
           iframe.src = url;
+          modalContentArea.innerHTML = "";
           modalContentArea.appendChild(iframe);
         } else if (isExcel && typeof XLSX !== "undefined") {
           fetch(url)
@@ -398,6 +428,7 @@ block content
               const wrap = document.createElement("div");
               wrap.style.cssText = "overflow:auto;flex:1;padding:16px;background:#fff;";
               wrap.appendChild(table);
+              modalContentArea.innerHTML = "";
               modalContentArea.appendChild(wrap);
             })
             .catch(() => renderAdminFallback(url, item.name, "Classeur Excel"));
@@ -423,7 +454,35 @@ block content
 
       function closeAdminPreview() {
         modalPreview.style.display = "none";
-        modalContentArea.innerHTML = "";
+        modalContentArea.innerHTML = `
+          <div class="skeleton-doc-container" style="flex:1;">
+            <div class="skeleton-doc-toolbar">
+              <div class="sk-line w-33" style="margin-bottom:0;"></div>
+              <div class="sk-btn" style="width:100px; height:30px;"></div>
+            </div>
+            <div class="skeleton-doc-paper">
+              <div class="sk-pill" style="margin-bottom:16px;"></div>
+              <div class="sk-line h-title w-50"></div>
+              <div class="sk-line w-80"></div>
+              <div class="sk-line w-65" style="margin-bottom:24px;"></div>
+              <div class="skeleton-doc-table-preview">
+                <div class="sk-table-head">
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                </div>
+                <div class="sk-table-row">
+                  <div class="sk-line w-33" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-50" style="margin-bottom:0;"></div>
+                </div>
+                <div class="sk-table-row">
+                  <div class="sk-line w-25" style="margin-bottom:0;"></div>
+                  <div class="sk-line w-65" style="margin-bottom:0;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
         document.body.style.overflow = "";
       }
 
@@ -483,10 +542,12 @@ block content
           const id = delBtn.getAttribute("data-id") || delBtn.getAttribute("data-name");
           const name = delBtn.getAttribute("data-name");
           if (confirm(`Voulez-vous vraiment supprimer l'emploi du temps de "${name}" ?`)) {
+            const row = delBtn.closest(".admin-edt-row");
+            if (row) row.classList.add("sk-table-row-deleting");
+
             fetch(`/admin/emplois/delete/${id}`, { method: "POST", headers: { "Accept": "application/json" } })
               .then(res => res.json())
               .then(data => {
-                const row = delBtn.closest(".admin-edt-row");
                 if (row) {
                   row.remove();
                   filterRows();
@@ -495,6 +556,7 @@ block content
               })
               .catch(err => {
                 console.error(err);
+                if (row) row.classList.remove("sk-table-row-deleting");
                 alert("Erreur lors de la suppression.");
               });
           }

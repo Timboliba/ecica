@@ -46,6 +46,8 @@ router.get("/", async (req, res, next) => {
 
     res.render("contact", {
       pageTitle: "Contactez-nous - ECICA",
+      metaDescription: "Contactez l'ECICA à Bamako, Mali. Téléphone, adresse, fax et formulaire de contact en ligne.",
+      canonicalPath: "/contact",
       contactInfo,
       success: req.query.success === "1",
       error: req.query.error || null,

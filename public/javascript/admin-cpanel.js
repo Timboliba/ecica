@@ -84,6 +84,87 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 150);
   }
 
+  // Génère un squelette animé (skeleton loader) selon la page demandée
+  function getSkeletonHtml(url) {
+    return `
+      <div class="skeleton-dashboard-wrapper">
+        <div class="sk-header-bar">
+          <div style="flex: 1;">
+            <div class="sk-line h-title w-50"></div>
+            <div class="sk-line w-33"></div>
+          </div>
+          <div class="sk-btn"></div>
+        </div>
+
+        <div class="sk-stats-grid">
+          <div class="sk-stat-card">
+            <div class="sk-circle"></div>
+            <div class="sk-stat-card-info">
+              <div class="sk-line h-title w-50"></div>
+              <div class="sk-line w-80"></div>
+            </div>
+          </div>
+          <div class="sk-stat-card">
+            <div class="sk-circle"></div>
+            <div class="sk-stat-card-info">
+              <div class="sk-line h-title w-50"></div>
+              <div class="sk-line w-80"></div>
+            </div>
+          </div>
+          <div class="sk-stat-card">
+            <div class="sk-circle"></div>
+            <div class="sk-stat-card-info">
+              <div class="sk-line h-title w-50"></div>
+              <div class="sk-line w-80"></div>
+            </div>
+          </div>
+          <div class="sk-stat-card">
+            <div class="sk-circle"></div>
+            <div class="sk-stat-card-info">
+              <div class="sk-line h-title w-50"></div>
+              <div class="sk-line w-80"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-content-card">
+          <div class="sk-table-head">
+            <div class="sk-line w-25" style="margin-bottom:0;"></div>
+            <div class="sk-line w-25" style="margin-bottom:0;"></div>
+          </div>
+          <div class="sk-table-row">
+            <div class="sk-circle sm"></div>
+            <div class="sk-line w-33" style="margin-bottom:0;"></div>
+            <div class="sk-pill"></div>
+            <div class="sk-line w-25" style="margin-bottom:0;"></div>
+            <div class="sk-btn" style="width:70px; height:28px;"></div>
+          </div>
+          <div class="sk-table-row">
+            <div class="sk-circle sm"></div>
+            <div class="sk-line w-33" style="margin-bottom:0;"></div>
+            <div class="sk-pill"></div>
+            <div class="sk-line w-25" style="margin-bottom:0;"></div>
+            <div class="sk-btn" style="width:70px; height:28px;"></div>
+          </div>
+          <div class="sk-table-row">
+            <div class="sk-circle sm"></div>
+            <div class="sk-line w-33" style="margin-bottom:0;"></div>
+            <div class="sk-pill"></div>
+            <div class="sk-line w-25" style="margin-bottom:0;"></div>
+            <div class="sk-btn" style="width:70px; height:28px;"></div>
+          </div>
+          <div class="sk-table-row">
+            <div class="sk-circle sm"></div>
+            <div class="sk-line w-33" style="margin-bottom:0;"></div>
+            <div class="sk-pill"></div>
+            <div class="sk-line w-25" style="margin-bottom:0;"></div>
+            <div class="sk-btn" style="width:70px; height:28px;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // Fonction de navigation SPA
   async function navigateTo(url, pushHistory = true) {
     if (!spaContainer) {
@@ -92,8 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     startProgress();
-    spaContainer.style.opacity = "0.5";
-    spaContainer.style.transition = "opacity 0.15s ease";
+    // Affichage instantané du squelette de chargement
+    spaContainer.innerHTML = getSkeletonHtml(url);
+    spaContainer.style.opacity = "1";
 
     try {
       const response = await fetch(url, {

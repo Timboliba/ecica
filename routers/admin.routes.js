@@ -252,7 +252,7 @@ router.post("/users", requireAdminAuth, async (req, res) => {
 
 // Modification d'un administrateur existant
 const updateAdminHandler = async (req, res) => {
-  const adminId = parseInt(req.params.id, 10);
+  const adminId = parseInt(req.params.id || req.body.id, 10);
   if (isNaN(adminId)) {
     return res
       .status(400)
@@ -373,6 +373,7 @@ const updateAdminHandler = async (req, res) => {
   }
 };
 
+router.post("/users/edit", requireAdminAuth, updateAdminHandler);
 router.post("/users/:id/edit", requireAdminAuth, updateAdminHandler);
 router.put("/users/:id", requireAdminAuth, updateAdminHandler);
 
