@@ -87,7 +87,7 @@ block content
         const map = L.map(document.querySelector('.map-container')).setView([lat, lng], 13);
 
         // 🔹 Style de carte (propre)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
