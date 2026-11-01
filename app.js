@@ -10,6 +10,10 @@ const router = require("./routers/index.routes");
 
 const app = express();
 
+// Indique à Express qu'il tourne derrière le reverse proxy Nginx (CloudPanel)
+// Indispensable pour express-rate-limit et la détection correcte de l'IP client
+app.set("trust proxy", 1);
+
 // 1. En-têtes HTTP de sécurité avec Helmet
 app.use(
   helmet({
