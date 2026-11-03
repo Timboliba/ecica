@@ -27,4 +27,10 @@ router.use("/Liens", liens);
 router.use("/Emplois", emploisDuTemps);
 router.use("/Formation", systemeEducatif);
 
+// Redirection directe vers la page des détails de formation
+router.get("/detailsFormation", (req, res) => {
+  const query = req.url.includes("?") ? req.url.substring(req.url.indexOf("?")) : "";
+  res.redirect(302, `/Formation/detailsFormation${query}`);
+});
+
 module.exports = router;

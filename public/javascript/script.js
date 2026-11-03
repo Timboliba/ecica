@@ -232,10 +232,22 @@ if (sliderWrapper && cardsContainer && prevBtn && nextBtn) {
 
   // Support tactile mobile (glisser / swipe)
   let touchStartX = 0;
+  let isSwiping = false;
   sliderWrapper.addEventListener(
     "touchstart",
     (e) => {
       touchStartX = e.touches[0].clientX;
+      isSwiping = false;
+    },
+    { passive: true }
+  );
+
+  sliderWrapper.addEventListener(
+    "touchmove",
+    (e) => {
+      if (Math.abs(e.touches[0].clientX - touchStartX) > 10) {
+        isSwiping = true;
+      }
     },
     { passive: true }
   );
@@ -252,9 +264,38 @@ if (sliderWrapper && cardsContainer && prevBtn && nextBtn) {
         currentPage--;
         updatePagination();
       }
+      setTimeout(() => {
+        isSwiping = false;
+      }, 100);
     },
     { passive: true }
   );
 
   updatePagination();
+
+  // Navigation par clic sur la carte ou son bouton
+  cards.forEach((card) => {
+    card.addEventListener("click", (e) => {
+      if (isSwiping) return;
+      if (e.target.closest("a.formation-card__cta")) return;
+      const url = card.dataset.url || card.querySelector(".formation-card__cta")?.getAttribute("href");
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  });
 }
+
+// Gestion du clic pour toute carte de formation (ex: page de détails)
+document.querySelectorAll(".formation-card").forEach((card) => {
+  if (!card.dataset.hasClickListener) {
+    card.dataset.hasClickListener = "true";
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("a.formation-card__cta")) return;
+      const url = card.dataset.url || card.querySelector(".formation-card__cta")?.getAttribute("href");
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  }
+});
