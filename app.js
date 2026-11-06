@@ -93,7 +93,7 @@ if (isProd) {
 // 4. Servir les fichiers statiques avec cache navigateur et ETags
 app.use(
   express.static(path.join(__dirname, "public"), {
-    maxAge: isProd ? "7d" : 0,
+    maxAge: isProd ? "30d" : 0,
     etag: true,
     lastModified: true,
   })
@@ -107,6 +107,41 @@ app.use(authenticateToken);
 
 // 6. Routes principales
 app.use(router);
+
+// 7. Page 404 (Ressource non trouvée)
+app.use((req, res) => {
+  res.status(404).render("404", {
+    pageTitle: "Page non trouvée - ECICA",
+    canonicalPath: req.path,
+  });
+});
+
+// 8. Gestionnaire d'erreurs global (Empêche la fuite de stack traces en production)
+app.use((err, req, res, next) => {
+  console.error("❌ Erreur serveur non interceptée :", err.stack || err);
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  const isProduction = process.env.NODE_ENV === "production";
+  const statusCode = err.status || err.statusCode || 500;
+
+  if (
+    req.xhr ||
+    (req.headers.accept && req.headers.accept.includes("application/json")) ||
+    req.headers["x-requested-with"] === "SPA"
+  ) {
+    return res.status(statusCode).json({
+      success: false,
+      error: isProduction ? "Une erreur interne est survenue." : err.message,
+    });
+  }
+
+  res.status(statusCode).render("500", {
+    pageTitle: "Erreur serveur - ECICA",
+    error: isProduction ? null : err,
+  });
+});
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;

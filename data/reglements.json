@@ -1,0 +1,51 @@
+[
+  {
+    "id": "reglement-interieur-ecica",
+    "title": "Règlement Intérieur Général de l'E.C.I.C.A",
+    "category": "reglement-interieur",
+    "date": "15 Octobre 2024",
+    "description": "Ensemble des règles relatives à la vie scolaire, l'assiduité, les droits et devoirs des apprenants et la sécurité au sein du campus.",
+    "filename": null,
+    "fileUrl": "/docs/reglement_interieur_ecica.pdf",
+    "fileType": "pdf",
+    "fileSize": "1.2 Mo",
+    "createdAt": "2024-10-15T08:00:00.000Z"
+  },
+  {
+    "id": "decret-statuts-organisation",
+    "title": "Décret Portant Statuts et Organisation de l'E.C.I.C.A",
+    "category": "texte-officiel",
+    "date": "04 Janvier 2023",
+    "description": "Texte officiel régissant le statut juridique, les organes de gouvernance et les prérogatives pédagogiques de l'institution.",
+    "filename": null,
+    "fileUrl": "/docs/decret_organisation_ecica.pdf",
+    "fileType": "pdf",
+    "fileSize": "840 Ko",
+    "createdAt": "2023-01-04T09:30:00.000Z"
+  },
+  {
+    "id": "charte-examens-discipline",
+    "title": "Charte des Examens, Contrôles Continus & Discipline",
+    "category": "charte-ethique",
+    "date": "20 Septembre 2024",
+    "description": "Conditions de déroulement des épreuves, prévention de la fraude académique, barèmes et commissions de discipline.",
+    "filename": null,
+    "fileUrl": "/docs/charte_examens_ecica.docx",
+    "fileType": "docx",
+    "fileSize": "450 Ko",
+    "createdAt": "2024-09-20T10:15:00.000Z"
+  },
+  {
+    "id": "guide-stages-conventionnes",
+    "title": "Guide et Règlement des Stages en Entreprise",
+    "category": "pedagogie",
+    "date": "12 Novembre 2024",
+    "description": "Modalités d'attribution, conventions de stage, suivi en milieu professionnel et critères d'évaluation des rapports de stage.",
+    "filename": null,
+    "fileUrl": "/docs/guide_stages_ecica.pdf",
+    "fileType": "pdf",
+    "fileSize": "620 Ko",
+    "createdAt": "2024-11-12T14:00:00.000Z"
+  }
+]
+

@@ -7,15 +7,22 @@ const liens = require("./liens.routes");
 const systemeEducatif = require("./formations.routes");
 const emploisDuTemps = require("./emplois-list.routes");
 const admin = require("./admin.routes");
+const formationsService = require("../services/formations.service");
 const user = { name: "joen doe" };
 
-router.get("/", (req, res) => {
-  res.render("acceuil", {
-    user,
-    canonicalPath: "/",
-    pageTitle: "ECICA - École Centrale pour l'Industrie, le Commerce et l'Administration",
-    metaDescription: "L'ECICA est une école privée de référence à Bamako, Mali. Formations professionnelles en industrie, commerce, administration et informatique.",
-  });
+router.get("/", async (req, res, next) => {
+  try {
+    const formations = await formationsService.getAllFormations();
+    res.render("acceuil", {
+      user,
+      canonicalPath: "/",
+      pageTitle: "ECICA - École Centrale pour l'Industrie, le Commerce et l'Administration",
+      metaDescription: "L'ECICA est une école privée de référence à Bamako, Mali. Formations professionnelles en industrie, commerce, administration et informatique.",
+      formations,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.use("/admin", admin);

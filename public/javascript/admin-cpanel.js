@@ -24,10 +24,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const closeSidebarBtn = document.getElementById("btn-close-sidebar-mobile");
+  const sidebarBackdrop = document.getElementById("admin-sidebar-backdrop");
+
+  function openMobileSidebar() {
+    if (sidebar) sidebar.classList.add("mobile-open");
+    if (sidebarBackdrop) sidebarBackdrop.classList.add("show");
+    document.body.classList.add("sidebar-locked");
+  }
+
+  function closeMobileSidebar() {
+    if (sidebar) sidebar.classList.remove("mobile-open");
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove("show");
+    document.body.classList.remove("sidebar-locked");
+  }
+
   if (toggleMenuBtn && sidebar) {
     toggleMenuBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("mobile-open");
+      if (sidebar.classList.contains("mobile-open")) {
+        closeMobileSidebar();
+      } else {
+        openMobileSidebar();
+      }
     });
+  }
+
+  if (closeSidebarBtn) {
+    closeSidebarBtn.addEventListener("click", closeMobileSidebar);
+  }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener("click", closeMobileSidebar);
   }
 
   // Raccourci clavier Ctrl+K / Cmd+K
@@ -231,11 +258,29 @@ document.addEventListener("DOMContentLoaded", () => {
       updateActiveSidebarLink(url);
 
       // 6. Fermer le menu mobile si ouvert
-      if (sidebar && sidebar.classList.contains("mobile-open")) {
-        sidebar.classList.remove("mobile-open");
+      closeMobileSidebar();
+
+      // 7. Executer les scripts de la vue chargee (car innerHTML n'execute pas les balises <script>)
+      const scripts = Array.from(spaContainer.querySelectorAll("script"));
+      for (const oldScript of scripts) {
+        const newScript = document.createElement("script");
+        Array.from(oldScript.attributes).forEach((attr) =>
+          newScript.setAttribute(attr.name, attr.value)
+        );
+        if (oldScript.src) {
+          await new Promise((resolve) => {
+            newScript.onload = resolve;
+            newScript.onerror = resolve;
+            document.head.appendChild(newScript);
+          });
+        } else {
+          newScript.textContent = oldScript.textContent;
+          document.body.appendChild(newScript);
+        }
+        oldScript.remove();
       }
 
-      // 7. Réinitialiser les écouteurs interactifs de la vue chargée
+      // 8. Reinitialiser les ecouteurs interactifs de la vue chargee
       initInteractiveElements();
 
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -314,6 +359,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // 3. ÉLÉMENTS INTERACTIFS DES VUES
   // =========================================================
   function initInteractiveElements() {
+    // Initialisation automatique de la page Emplois du temps si presente
+    if (typeof window.initAdminEmplois === "function") {
+      window.initAdminEmplois();
+    }
+
+    // Initialisation automatique de la page Formations si presente
+    if (typeof window.initAdminFormations === "function") {
+      window.initAdminFormations();
+    }
+
     // Checkboxes des tâches avec effet visuel
     const taskCheckboxes = document.querySelectorAll(".task-checkbox");
     taskCheckboxes.forEach((checkbox) => {
@@ -449,30 +504,83 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 3. Fermer les modales (Bouton croix ou Annuler)
-    const closeBtn = e.target.closest(".admin-modal-close, .btn-modal-cancel");
-    if (closeBtn) {
+    // 2 ter. Ouvrir la modale d'ajout d'emploi du temps
+    const openAddEdtBtn = e.target.closest("#btn-admin-add-edt");
+    if (openAddEdtBtn) {
       e.preventDefault();
-      const modal = closeBtn.closest(".admin-modal-backdrop");
+      const modal = document.getElementById("admin-modal-add");
       if (modal) {
-        modal.style.display = "none";
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+        const firstInput = document.getElementById("admin-input-class-name");
+        if (firstInput) firstInput.focus();
       }
       return;
     }
 
-    // 4. Fermer en cliquant sur le backdrop
-    if (e.target.classList.contains("admin-modal-backdrop")) {
-      e.target.style.display = "none";
+    // 2 quater. Dropzone pour fichier Emploi du temps
+    const dropzoneAdd = e.target.closest("#admin-dropzone");
+    if (dropzoneAdd) {
+      const fileInput = document.getElementById("admin-input-file");
+      if (fileInput) fileInput.click();
+      return;
+    }
+    const dropzoneEdit = e.target.closest("#admin-edit-dropzone");
+    if (dropzoneEdit) {
+      const fileEditInput = document.getElementById("admin-edit-input-file");
+      if (fileEditInput) fileEditInput.click();
+      return;
+    }
+
+    // 2 quinquies. Ouvrir la modale d'ajout de formation
+    const openAddFormationBtn = e.target.closest("#btn-admin-add-formation");
+    if (openAddFormationBtn) {
+      e.preventDefault();
+      const modal = document.getElementById("admin-modal-add-formation");
+      if (modal) {
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+        const firstInput = document.getElementById("add-formation-title");
+        if (firstInput) firstInput.focus();
+      }
+      return;
+    }
+
+    // 3. Fermer les modales (Bouton croix ou Annuler)
+    const closeBtn = e.target.closest(
+      ".admin-modal-close, .btn-modal-cancel, #admin-modal-add-close, #admin-btn-cancel-add, #admin-modal-edit-close, #admin-btn-cancel-edit, #admin-modal-close-btn, #admin-modal-add-formation-close, #admin-btn-cancel-add-formation, #admin-modal-edit-formation-close, #admin-btn-cancel-edit-formation, #admin-modal-add-reglement-close, #admin-btn-cancel-add-reglement, #admin-modal-edit-reglement-close, #admin-btn-cancel-edit-reglement"
+    );
+    if (closeBtn) {
+      e.preventDefault();
+      const modal = closeBtn.closest(".admin-modal-backdrop, .edt-modal");
+      if (modal) {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      }
+      return;
+    }
+
+    // 4. Fermer en cliquant sur le backdrop ou overlay
+    if (
+      e.target.classList.contains("admin-modal-backdrop") ||
+      e.target.classList.contains("modal-overlay")
+    ) {
+      const modal = e.target.closest(".admin-modal-backdrop, .edt-modal") || e.target;
+      if (modal) {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      }
     }
   });
 
   // Fermer la modale avec la touche Echap (Escape)
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      const openModals = document.querySelectorAll(".admin-modal-backdrop");
+      const openModals = document.querySelectorAll(".admin-modal-backdrop, .edt-modal");
       openModals.forEach((m) => {
         if (m.style.display !== "none") {
           m.style.display = "none";
+          document.body.style.overflow = "";
         }
       });
     }

@@ -1,0 +1,747 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    //- TOP HEADER
+    .dashboard-header
+      .greeting-block
+        h2.greeting-title Gestion des Formations
+        p.greeting-subtitle Créez, modifiez et gérez l'ensemble des programmes et fiches détaillées des formations de l'E.C.I.C.A.
+
+      button#btn-admin-add-formation.date-filter-btn(type="button" style="background: #2563eb; color: #fff; border: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 1px 3px rgba(37,99,235,0.3);")
+        svg(width="16", height="16", viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+          line(x1="12", y1="5", x2="12", y2="19")
+          line(x1="5", y1="12", x2="19", y2="12")
+        span Ajouter une formation
+
+    //- KPI CARDS
+    .kpi-grid(style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;")
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.blue
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z")
+          .kpi-info
+            span.kpi-title Total Formations
+            span#kpi-total-formations.kpi-value= (formations ? formations.length : 0)
+        .kpi-trend
+          span.trend-positive Formations actives
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.blue(style="background: #eff6ff; color: #1e40af;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              rect(x="2" y="7" width="20" height="14" rx="2" ry="2")
+              path(d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16")
+          .kpi-info
+            span.kpi-title Génie Industriel
+            span#kpi-industrie-formations.kpi-value= (formations ? formations.filter(f => f.badge && f.badge.includes('Industriel') || f.badge && f.badge.includes('Électrique')).length : 0)
+        .kpi-trend
+          span.trend-positive Industrie & Énergie
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.teal(style="background: #ecfdf5; color: #065f46;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              circle(cx="12" cy="12" r="10")
+              polyline(points="12 6 12 12 16 14")
+          .kpi-info
+            span.kpi-title Commerce & Gestion
+            span#kpi-commerce-formations.kpi-value= (formations ? formations.filter(f => f.badge && (f.badge.includes('Commerce') || f.badge.includes('Finance') || f.badge.includes('Administration'))).length : 0)
+        .kpi-trend
+          span.trend-positive Tertiaire & Finance
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.purple(style="background: #f5f3ff; color: #6d28d9;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              rect(x="2" y="3" width="20" height="14" rx="2" ry="2")
+              line(x1="8" y1="21" x2="16" y2="21")
+              line(x1="12" y1="17" x2="12" y2="21")
+          .kpi-info
+            span.kpi-title Numérique & IT
+            span#kpi-it-formations.kpi-value= (formations ? formations.filter(f => f.badge && (f.badge.includes('Numérique') || f.badge.includes('Digital') || f.badge.includes('IT'))).length : 0)
+        .kpi-trend
+          span.trend-positive Informatique & Web
+
+    //- MAIN FORMATIONS CONTAINER
+    .dashboard-card(style="margin-top: 24px; padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: visible;")
+      //- Search & Filters Toolbar
+      .formations-toolbar(style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;")
+        .edt-search-box(style="position: relative; width: 100%;")
+          svg.search-icon(width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none;")
+            circle(cx="11" cy="11" r="8")
+            line(x1="21" y1="21" x2="16.65" y2="16.65")
+          input#admin-formation-search.search-input(type="text" placeholder="Rechercher une formation (titre, pôle, diplôme, mot-clé...)" autocomplete="off" style="width: 100%; height: 48px; padding-left: 46px; padding-right: 40px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.925rem; color: #1e293b; background: #fff; outline: none; box-sizing: border-box;")
+          button#admin-btn-clear-formation-search(type="button" style="display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer;") &times;
+
+        //- Filter tabs
+        .contents-filter-tabs(style="display: flex; gap: 8px; flex-wrap: wrap;")
+          button.cft-tab.formation-filter-tab.active(type="button" data-filter="all") Tous
+          button.cft-tab.formation-filter-tab(type="button" data-filter="Génie Industriel") Génie Industriel
+          button.cft-tab.formation-filter-tab(type="button" data-filter="Commerce & Douanes") Commerce & Douanes
+          button.cft-tab.formation-filter-tab(type="button" data-filter="Commerce & Finance") Commerce & Finance
+          button.cft-tab.formation-filter-tab(type="button" data-filter="Numérique & IT") Numérique & IT
+          button.cft-tab.formation-filter-tab(type="button" data-filter="Administration") Administration
+
+      //- Table
+      .table-responsive(style="border: 1px solid #f1f5f9; border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%;")
+        table.edt-table(style="width: 100%; min-width: 720px; border-collapse: collapse; text-align: left;")
+          thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
+            tr
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Formation
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Pôle
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Rentrée & Durée
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Lieu
+              th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569; text-align: right; padding-right: 24px;") Actions
+          tbody#admin-formations-tbody
+            if formations && formations.length
+              each item in formations
+                tr.admin-formation-row(data-name=item.title.toLowerCase() data-badge=item.badge.toLowerCase() data-desc=(item.description || "").toLowerCase() data-id=item.id style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;")
+                  td(style="padding: 14px 20px; vertical-align: middle;")
+                    .formation-identity(style="display: inline-flex; align-items: center; gap: 12px;")
+                      img.formation-thumb(src=item.image alt=item.title style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; flex-shrink: 0;" onerror="this.src='/img/picture1.webp'")
+                      div(style="display: flex; flex-direction: column;")
+                        span.formation-title(style="font-size: 0.925rem; font-weight: 600; color: #1e293b; line-height: 1.3;")= item.title
+                        span.formation-slug(style="font-size: 0.75rem; color: #64748b; font-family: monospace;")= "/Formation/detailsFormation?id=" + item.id
+
+                  td(style="padding: 14px 20px; vertical-align: middle;")
+                    span.formation-badge-pill(style=`display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.775rem; font-weight: 600; background: ${item.badgeBg || '#eff6ff'}; color: ${item.badgeColor || '#1e40af'}; border: 1px solid rgba(0,0,0,0.06);`)
+                      span= item.badge
+
+                  td(style="padding: 14px 20px; vertical-align: middle;")
+                    div(style="display: flex; flex-direction: column; font-size: 0.85rem;")
+                      strong(style="color: #334155;")= item.date || "Prochaine rentrée"
+                      span(style="color: #64748b; font-size: 0.775rem;")= item.duree || "9 mois"
+
+                  td(style="padding: 14px 20px; vertical-align: middle; color: #64748b; font-size: 0.85rem;")
+                    span= item.lieu ? item.lieu.split('—')[0].trim() : "Campus Bamako"
+
+                  td(style="padding: 14px 20px; vertical-align: middle; text-align: right;")
+                    .actions-wrap(style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;")
+                      a.btn-action(href=`/Formation/detailsFormation?id=${item.id}` target="_blank" rel="noopener" title="Voir la page publique" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #2563eb; font-size: 0.8rem; font-weight: 600; text-decoration: none;")
+                        svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          path(d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z")
+                          circle(cx="12" cy="12" r="3")
+                        span Voir
+
+                      button.btn-action.btn-edit-formation(type="button" data-id=item.id title="Modifier la formation" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 0.8rem; font-weight: 600; cursor: pointer;")
+                        svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          path(d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z")
+                        span Modifier
+
+                      button.btn-action.btn-delete-formation(type="button" data-id=item.id data-name=item.title title="Supprimer la formation" style="display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 0.8rem; cursor: pointer;")
+                        svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          polyline(points="3 6 5 6 21 6")
+                          path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+            else
+              tr
+                td(colspan="5" style="text-align: center; padding: 40px; color: #64748b;")
+                  p(style="margin: 0; font-size: 0.95rem;") Aucune formation enregistrée pour le moment.
+
+  //- MODAL AJOUT DE FORMATION
+  #admin-modal-add-formation.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 94vw; max-width: 900px; max-height: 90vh; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        div
+          h3(style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;") Ajouter une nouvelle formation
+          p(style="font-size: 0.775rem; color: #64748b; margin: 2px 0 0;") Renseignez les informations pédagogiques et organisationnelles de la formation.
+        button#admin-modal-add-formation-close(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+          svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="18" y1="6" x2="6" y2="18")
+            line(x1="6" y1="6" x2="18" y2="18")
+
+      form#admin-form-add-formation(enctype="multipart/form-data" style="padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; -webkit-overflow-scrolling: touch;")
+        //- BLOC 1 : INFORMATIONS FONDAMENTALES
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 1
+            span Identification & Présentation générale
+
+          .form-group(style="margin-bottom: 14px;")
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Titre de la formation *
+            input#add-formation-title(type="text" name="title" placeholder="Ex: Maintenance des Systèmes Industriels & Automatismes" required style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+
+          .form-grid-2(style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Pôle / Catégorie
+              input#add-formation-badge(type="text" name="badge" list="poles-suggestions" placeholder="Ex: Génie Industriel, Informatique, Douanes... (facultatif)" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff; box-sizing: border-box; outline: none;")
+              datalist#poles-suggestions
+                option(value="Génie Industriel")
+                option(value="Commerce & Douanes")
+                option(value="Commerce & Finance")
+                option(value="Numérique & IT")
+                option(value="Pôle Digital")
+                option(value="Administration")
+                option(value="Génie Électrique")
+                option(value="BTP & Construction")
+
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Image d'illustration
+              input#add-formation-image(type="file" name="image" accept="image/*" style="width: 100%; height: 42px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff; box-sizing: border-box;")
+
+          .form-group
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Présentation détaillée du cursus *
+            textarea#add-formation-desc(name="description" rows="4" placeholder="Décrivez les compétences clés, les enjeux et l'approche pédagogique de la formation..." required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit; box-sizing: border-box; outline: none;")
+
+        //- BLOC 2 : MODALITÉS & CALENDRIER
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #0d9488; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 2
+            span Modalités pratiques & Calendrier
+
+          .form-grid-4(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Date de rentrée
+              input(type="text" name="date" placeholder="Ex: 18 Novembre 2026" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Durée
+              input(type="text" name="duree" placeholder="Ex: 10 mois" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Rythme
+              input(type="text" name="rythme" placeholder="Ex: Cours du jour & soir" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Niveau requis
+              input(type="text" name="niveau" placeholder="Ex: Bac / BT / CAP" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+          .form-grid-4(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Lieu
+              input(type="text" name="lieu" placeholder="Ex: Campus Bamako Médina-Coura" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Organisateur
+              input(type="text" name="organisateur" placeholder="Ex: E.C.I.C.A — Dpt Industrie" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Places
+              input(type="text" name="places" placeholder="Ex: 25 places disponibles" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Frais
+              input(type="text" name="frais" placeholder="Ex: Tarif conventionné" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+        //- BLOC 3 : OBJECTIFS & PROGRAMME D'ENSEIGNEMENT
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #7c3aed; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 3
+            span Objectifs pédagogiques & Modules du programme
+
+          //- Objectifs dynamiques
+          .form-group(style="margin-bottom: 18px;")
+            label(style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 8px;")
+              span Objectifs & compétences visées
+              button#btn-add-objective-row.btn-text-action(type="button" style="color: #2563eb; background: none; border: none; font-size: 0.825rem; font-weight: 600; cursor: pointer;") + Ajouter un objectif
+            #add-objectives-list(style="display: flex; flex-direction: column; gap: 8px;")
+              .dynamic-input-row(style="display: flex; gap: 8px; align-items: center;")
+                input(type="text" name="objectifs[]" placeholder="Ex: Diagnostiquer les pannes électromécaniques..." style="flex: 1; height: 38px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; box-sizing: border-box;")
+                button.btn-remove-row(type="button" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;") &times;
+
+          //- Modules dynamiques
+          .form-group
+            label(style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 8px;")
+              span Programme des modules
+              button#btn-add-module-row.btn-text-action(type="button" style="color: #2563eb; background: none; border: none; font-size: 0.825rem; font-weight: 600; cursor: pointer;") + Ajouter un module
+            #add-modules-list(style="display: flex; flex-direction: column; gap: 12px;")
+              .dynamic-module-card(style="background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; position: relative;")
+                div(style="display: flex; gap: 8px; align-items: center;")
+                  input(type="text" name="module_titles[]" placeholder="Ex: Module 1 : Électrotechnique appliquée" style="flex: 1; height: 36px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; font-weight: 600; box-sizing: border-box;")
+                  button.btn-remove-row(type="button" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;") &times;
+                textarea(name="module_details[]" rows="2" placeholder="Détails du module et matières abordées..." style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.825rem; font-family: inherit; box-sizing: border-box;")
+
+        //- BLOC 4 : ADMISSION & DÉBOUCHÉS
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #f97316; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 4
+            span Admission, Diplôme & Métiers visés
+
+          .form-group(style="margin-bottom: 14px;")
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Prérequis / Public admissible
+            textarea(name="prerequis" rows="2" placeholder="Ex: Titulaire d'un Baccalauréat ou Brevet de Technicien..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; font-family: inherit; box-sizing: border-box;")
+
+          .form-grid-2(style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Diplôme / Certification délivrée
+              input(type="text" name="certification" placeholder="Ex: Certificat de Qualification Professionnelle E.C.I.C.A" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Débouchés & Métiers (séparés par des virgules)
+              input(type="text" name="debouches" placeholder="Ex: Technicien de maintenance, Automaticien..." style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+        .modal-form-actions(style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; position: sticky; bottom: 0; background: #fff; padding-top: 14px; border-top: 1px solid #e2e8f0;")
+          button#admin-btn-cancel-add-formation(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
+          button#admin-btn-submit-add-formation(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Enregistrer & Publier
+
+  //- MODAL MODIFICATION DE FORMATION
+  #admin-modal-edit-formation.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 94vw; max-width: 900px; max-height: 90vh; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        div
+          h3(style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;") Modifier la formation
+          p#edit-formation-subtitle(style="font-size: 0.775rem; color: #64748b; margin: 2px 0 0;") Mettez à jour le contenu de la formation sélectionnée.
+        button#admin-modal-edit-formation-close(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+          svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="18" y1="6" x2="6" y2="18")
+            line(x1="6" y1="6" x2="18" y2="18")
+
+      form#admin-form-edit-formation(enctype="multipart/form-data" style="padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; -webkit-overflow-scrolling: touch;")
+        input#edit-formation-id(type="hidden" name="id")
+
+        //- BLOC 1 : IDENTIFICATION
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 1
+            span Identification & Présentation générale
+
+          .form-group(style="margin-bottom: 14px;")
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Titre de la formation *
+            input#edit-formation-title(type="text" name="title" required style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+
+          .form-grid-2(style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Pôle / Catégorie
+              input#edit-formation-badge(type="text" name="badge" list="poles-suggestions" placeholder="Ex: Génie Industriel, Informatique, Douanes... (facultatif)" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff; box-sizing: border-box; outline: none;")
+
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Remplacer l'image
+              input#edit-formation-image(type="file" name="image" accept="image/*" style="width: 100%; height: 42px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff; box-sizing: border-box;")
+
+          .form-group
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Présentation détaillée *
+            textarea#edit-formation-desc(name="description" rows="4" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit; box-sizing: border-box; outline: none;")
+
+        //- BLOC 2 : MODALITÉS PRATIQUES
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #0d9488; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 2
+            span Modalités pratiques & Calendrier
+
+          .form-grid-4(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Date de rentrée
+              input#edit-formation-date(type="text" name="date" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Durée
+              input#edit-formation-duree(type="text" name="duree" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Rythme
+              input#edit-formation-rythme(type="text" name="rythme" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Niveau requis
+              input#edit-formation-niveau(type="text" name="niveau" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+          .form-grid-4(style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Lieu
+              input#edit-formation-lieu(type="text" name="lieu" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Organisateur
+              input#edit-formation-organisateur(type="text" name="organisateur" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Places
+              input#edit-formation-places(type="text" name="places" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Frais
+              input#edit-formation-frais(type="text" name="frais" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+        //- BLOC 3 : OBJECTIFS & MODULES
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #7c3aed; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 3
+            span Objectifs pédagogiques & Modules du programme
+
+          .form-group(style="margin-bottom: 18px;")
+            label(style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 8px;")
+              span Objectifs visés
+              button#btn-edit-add-objective-row.btn-text-action(type="button" style="color: #2563eb; background: none; border: none; font-size: 0.825rem; font-weight: 600; cursor: pointer;") + Ajouter un objectif
+            #edit-objectives-list(style="display: flex; flex-direction: column; gap: 8px;")
+
+          .form-group
+            label(style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 8px;")
+              span Programme des modules
+              button#btn-edit-add-module-row.btn-text-action(type="button" style="color: #2563eb; background: none; border: none; font-size: 0.825rem; font-weight: 600; cursor: pointer;") + Ajouter un module
+            #edit-modules-list(style="display: flex; flex-direction: column; gap: 12px;")
+
+        //- BLOC 4 : ADMISSION & DÉBOUCHÉS
+        .form-section-card(style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;")
+          h4(style="margin: 0 0 14px; font-size: 0.95rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;")
+            span(style="width: 24px; height: 24px; border-radius: 6px; background: #f97316; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;") 4
+            span Admission, Diplôme & Métiers
+
+          .form-group(style="margin-bottom: 14px;")
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Prérequis / Public admissible
+            textarea#edit-formation-prerequis(name="prerequis" rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; font-family: inherit; box-sizing: border-box;")
+
+          .form-grid-2(style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;")
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Diplôme / Certification
+              input#edit-formation-certification(type="text" name="certification" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+            .form-group
+              label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Débouchés (séparés par des virgules)
+              input#edit-formation-debouches(type="text" name="debouches" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;")
+
+        .modal-form-actions(style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; position: sticky; bottom: 0; background: #fff; padding-top: 14px; border-top: 1px solid #e2e8f0;")
+          button#admin-btn-cancel-edit-formation(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
+          button#admin-btn-submit-edit-formation(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Mettre à jour la formation
+
+  script.
+    window.initAdminFormations = function () {
+      const searchInput = document.getElementById("admin-formation-search");
+      const btnClearSearch = document.getElementById("admin-btn-clear-formation-search");
+      const filterTabs = document.querySelectorAll(".formation-filter-tab");
+      const rows = document.querySelectorAll(".admin-formation-row");
+
+      let currentCategory = "all";
+
+      function filterRows() {
+        const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+        if (btnClearSearch) btnClearSearch.style.display = query ? "block" : "none";
+
+        rows.forEach(r => {
+          const name = r.getAttribute("data-name") || "";
+          const badge = r.getAttribute("data-badge") || "";
+          const desc = r.getAttribute("data-desc") || "";
+
+          const matchesQuery = !query || name.includes(query) || badge.includes(query) || desc.includes(query);
+          const matchesCategory = currentCategory === "all" || badge.toLowerCase().includes(currentCategory.toLowerCase());
+
+          r.style.display = (matchesQuery && matchesCategory) ? "" : "none";
+        });
+      }
+
+      if (searchInput) searchInput.addEventListener("input", filterRows);
+      if (btnClearSearch) {
+        btnClearSearch.addEventListener("click", () => {
+          searchInput.value = "";
+          filterRows();
+          searchInput.focus();
+        });
+      }
+
+      filterTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          filterTabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          currentCategory = tab.getAttribute("data-filter") || "all";
+          filterRows();
+        });
+      });
+
+      // Modales
+      const modalAdd = document.getElementById("admin-modal-add-formation");
+      const btnOpenAdd = document.getElementById("btn-admin-add-formation");
+      const btnCloseAdd = document.getElementById("admin-modal-add-formation-close");
+      const btnCancelAdd = document.getElementById("admin-btn-cancel-add-formation");
+      const formAdd = document.getElementById("admin-form-add-formation");
+
+      const modalEdit = document.getElementById("admin-modal-edit-formation");
+      const btnCloseEdit = document.getElementById("admin-modal-edit-formation-close");
+      const btnCancelEdit = document.getElementById("admin-btn-cancel-edit-formation");
+      const formEdit = document.getElementById("admin-form-edit-formation");
+
+      function openModal(modal) {
+        if (!modal) return;
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal(modal, form = null) {
+        if (!modal) return;
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+        if (form) form.reset();
+      }
+
+      if (btnOpenAdd) {
+        btnOpenAdd.addEventListener("click", () => {
+          openModal(modalAdd);
+          const titleInput = document.getElementById("add-formation-title");
+          if (titleInput) titleInput.focus();
+        });
+      }
+
+      if (btnCloseAdd) btnCloseAdd.addEventListener("click", () => closeModal(modalAdd, formAdd));
+      if (btnCancelAdd) btnCancelAdd.addEventListener("click", () => closeModal(modalAdd, formAdd));
+      if (modalAdd) {
+        const ov = modalAdd.querySelector(".modal-overlay");
+        if (ov) ov.addEventListener("click", () => closeModal(modalAdd, formAdd));
+      }
+
+      if (btnCloseEdit) btnCloseEdit.addEventListener("click", () => closeModal(modalEdit, formEdit));
+      if (btnCancelEdit) btnCancelEdit.addEventListener("click", () => closeModal(modalEdit, formEdit));
+      if (modalEdit) {
+        const ov = modalEdit.querySelector(".modal-overlay");
+        if (ov) ov.addEventListener("click", () => closeModal(modalEdit, formEdit));
+      }
+
+      // Ajout dynamique d'objectifs dans le formulaire d'ajout
+      const btnAddObjRow = document.getElementById("btn-add-objective-row");
+      const objContainer = document.getElementById("add-objectives-list");
+      if (btnAddObjRow && objContainer) {
+        btnAddObjRow.addEventListener("click", () => {
+          const row = document.createElement("div");
+          row.className = "dynamic-input-row";
+          row.style.cssText = "display: flex; gap: 8px; align-items: center;";
+          row.innerHTML = `
+            <input type="text" name="objectifs[]" placeholder="Objectif ou compétence..." style="flex: 1; height: 38px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; box-sizing: border-box;" />
+            <button type="button" class="btn-remove-row" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+          `;
+          objContainer.appendChild(row);
+          row.querySelector("input").focus();
+        });
+      }
+
+      // Ajout dynamique de modules dans le formulaire d'ajout
+      const btnAddModRow = document.getElementById("btn-add-module-row");
+      const modContainer = document.getElementById("add-modules-list");
+      if (btnAddModRow && modContainer) {
+        btnAddModRow.addEventListener("click", () => {
+          const card = document.createElement("div");
+          card.className = "dynamic-module-card";
+          card.style.cssText = "background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; position: relative;";
+          card.innerHTML = `
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" name="module_titles[]" placeholder="Titre du module (ex: Module 2 : Automatisme)" style="flex: 1; height: 36px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; font-weight: 600; box-sizing: border-box;" />
+              <button type="button" class="btn-remove-row" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+            <textarea name="module_details[]" rows="2" placeholder="Détails du module et matières..." style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.825rem; font-family: inherit; box-sizing: border-box;"></textarea>
+          `;
+          modContainer.appendChild(card);
+          card.querySelector("input").focus();
+        });
+      }
+
+      // Délégation de suppression d'une ligne dynamique
+      document.addEventListener("click", (e) => {
+        const removeBtn = e.target.closest(".btn-remove-row");
+        if (removeBtn) {
+          const row = removeBtn.closest(".dynamic-input-row, .dynamic-module-card");
+          if (row) row.remove();
+        }
+      });
+
+      // Soumission formulaire d'ajout (avec protection anti-double soumission)
+      if (formAdd && !formAdd.dataset.hasSubmitListener) {
+        formAdd.dataset.hasSubmitListener = "true";
+        let isSubmittingAdd = false;
+
+        formAdd.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (isSubmittingAdd) return;
+          isSubmittingAdd = true;
+
+          const submitBtn = document.getElementById("admin-btn-submit-add-formation");
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Publication en cours...";
+          }
+
+          try {
+            const formData = new FormData(formAdd);
+            const res = await fetch("/admin/formations/add", {
+              method: "POST",
+              body: formData,
+              headers: { "Accept": "application/json" }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+              throw new Error(data.error || "Erreur lors de la création.");
+            }
+
+            closeModal(modalAdd, formAdd);
+            // Recharger la vue via SPA
+            if (typeof window.navigateTo === "function") {
+              await window.navigateTo("/admin/formations", false);
+            } else {
+              window.location.reload();
+            }
+          } catch (err) {
+            alert(err.message || "Erreur lors de la création de la formation.");
+          } finally {
+            isSubmittingAdd = false;
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Enregistrer & Publier";
+            }
+          }
+        });
+      }
+
+      // Actions sur les lignes (Modifier & Supprimer)
+      document.addEventListener("click", async (e) => {
+        const editBtn = e.target.closest(".btn-edit-formation");
+        if (editBtn) {
+          const id = editBtn.getAttribute("data-id");
+          try {
+            const res = await fetch(`/admin/formations/api/${id}`);
+            const data = await res.json();
+            if (!data.success || !data.item) throw new Error("Formation introuvable");
+
+            const item = data.item;
+            document.getElementById("edit-formation-id").value = item.id;
+            document.getElementById("edit-formation-title").value = item.title || "";
+            document.getElementById("edit-formation-badge").value = item.badge || "";
+            document.getElementById("edit-formation-desc").value = item.description || "";
+            document.getElementById("edit-formation-date").value = item.date || "";
+            document.getElementById("edit-formation-duree").value = item.duree || "";
+            document.getElementById("edit-formation-rythme").value = item.rythme || "";
+            document.getElementById("edit-formation-niveau").value = item.niveau || "";
+            document.getElementById("edit-formation-lieu").value = item.lieu || "";
+            document.getElementById("edit-formation-organisateur").value = item.organisateur || "";
+            document.getElementById("edit-formation-places").value = item.places || "";
+            document.getElementById("edit-formation-frais").value = item.frais || "";
+            document.getElementById("edit-formation-prerequis").value = item.prerequis || "";
+            document.getElementById("edit-formation-certification").value = item.certification || "";
+            document.getElementById("edit-formation-debouches").value = (item.debouches || []).join(", ");
+
+            // Remplir les objectifs dans la modale d'édition
+            const editObjContainer = document.getElementById("edit-objectives-list");
+            editObjContainer.innerHTML = "";
+            const objectifs = (item.objectifs && item.objectifs.length) ? item.objectifs : [""];
+            objectifs.forEach(obj => {
+              const row = document.createElement("div");
+              row.className = "dynamic-input-row";
+              row.style.cssText = "display: flex; gap: 8px; align-items: center;";
+              row.innerHTML = `
+                <input type="text" name="objectifs[]" value="${obj.replace(/"/g, '&quot;')}" placeholder="Objectif ou compétence..." style="flex: 1; height: 38px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; box-sizing: border-box;" />
+                <button type="button" class="btn-remove-row" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+              `;
+              editObjContainer.appendChild(row);
+            });
+
+            // Remplir les modules dans la modale d'édition
+            const editModContainer = document.getElementById("edit-modules-list");
+            editModContainer.innerHTML = "";
+            const modules = (item.programme && item.programme.length) ? item.programme : [{ module: "", details: "" }];
+            modules.forEach(m => {
+              const card = document.createElement("div");
+              card.className = "dynamic-module-card";
+              card.style.cssText = "background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; position: relative;";
+              card.innerHTML = `
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="text" name="module_titles[]" value="${(m.module || '').replace(/"/g, '&quot;')}" placeholder="Titre du module" style="flex: 1; height: 36px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; font-weight: 600; box-sizing: border-box;" />
+                  <button type="button" class="btn-remove-row" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+                </div>
+                <textarea name="module_details[]" rows="2" placeholder="Détails du module..." style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.825rem; font-family: inherit; box-sizing: border-box;">${m.details || ''}</textarea>
+              `;
+              editModContainer.appendChild(card);
+            });
+
+            openModal(modalEdit);
+          } catch (err) {
+            alert(err.message || "Erreur lors du chargement de la formation.");
+          }
+        }
+
+        const delBtn = e.target.closest(".btn-delete-formation");
+        if (delBtn) {
+          const id = delBtn.getAttribute("data-id");
+          const name = delBtn.getAttribute("data-name");
+          if (confirm(`Voulez-vous vraiment supprimer définitivement la formation "${name}" ?`)) {
+            try {
+              const res = await fetch(`/admin/formations/delete/${id}`, {
+                method: "POST",
+                headers: { "Accept": "application/json" }
+              });
+              const data = await res.json();
+              if (!res.ok || !data.success) throw new Error(data.error || "Erreur");
+
+              const row = delBtn.closest(".admin-formation-row");
+              if (row) row.remove();
+              const kpiTotal = document.getElementById("kpi-total-formations");
+              if (kpiTotal) kpiTotal.textContent = document.querySelectorAll(".admin-formation-row").length;
+            } catch (err) {
+              alert(err.message || "Erreur lors de la suppression.");
+            }
+          }
+        }
+      });
+
+      // Ajout dynamique dans formulaire d'édition
+      const btnEditAddObj = document.getElementById("btn-edit-add-objective-row");
+      const editObjContainer = document.getElementById("edit-objectives-list");
+      if (btnEditAddObj && editObjContainer) {
+        btnEditAddObj.addEventListener("click", () => {
+          const row = document.createElement("div");
+          row.className = "dynamic-input-row";
+          row.style.cssText = "display: flex; gap: 8px; align-items: center;";
+          row.innerHTML = `
+            <input type="text" name="objectifs[]" placeholder="Nouvel objectif..." style="flex: 1; height: 38px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; box-sizing: border-box;" />
+            <button type="button" class="btn-remove-row" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+          `;
+          editObjContainer.appendChild(row);
+          row.querySelector("input").focus();
+        });
+      }
+
+      const btnEditAddMod = document.getElementById("btn-edit-add-module-row");
+      const editModContainer = document.getElementById("edit-modules-list");
+      if (btnEditAddMod && editModContainer) {
+        btnEditAddMod.addEventListener("click", () => {
+          const card = document.createElement("div");
+          card.className = "dynamic-module-card";
+          card.style.cssText = "background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; position: relative;";
+          card.innerHTML = `
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" name="module_titles[]" placeholder="Titre du module" style="flex: 1; height: 36px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; font-weight: 600; box-sizing: border-box;" />
+              <button type="button" class="btn-remove-row" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #94a3b8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+            <textarea name="module_details[]" rows="2" placeholder="Détails du module..." style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.825rem; font-family: inherit; box-sizing: border-box;"></textarea>
+          `;
+          editModContainer.appendChild(card);
+          card.querySelector("input").focus();
+        });
+      }
+
+      // Soumission formulaire de modification (avec protection anti-double soumission)
+      if (formEdit && !formEdit.dataset.hasSubmitListener) {
+        formEdit.dataset.hasSubmitListener = "true";
+        let isSubmittingEdit = false;
+
+        formEdit.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (isSubmittingEdit) return;
+          isSubmittingEdit = true;
+
+          const id = document.getElementById("edit-formation-id").value;
+          const submitBtn = document.getElementById("admin-btn-submit-edit-formation");
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Mise à jour...";
+          }
+
+          try {
+            const formData = new FormData(formEdit);
+            const res = await fetch(`/admin/formations/edit/${id}`, {
+              method: "POST",
+              body: formData,
+              headers: { "Accept": "application/json" }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || "Erreur");
+
+            closeModal(modalEdit, formEdit);
+            if (typeof window.navigateTo === "function") {
+              await window.navigateTo("/admin/formations", false);
+            } else {
+              window.location.reload();
+            }
+          } catch (err) {
+            alert(err.message || "Erreur lors de la mise à jour.");
+          } finally {
+            isSubmittingEdit = false;
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Mettre à jour la formation";
+            }
+          }
+        });
+      }
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", window.initAdminFormations);
+    } else {
+      window.initAdminFormations();
+    }
+

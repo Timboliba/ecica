@@ -445,7 +445,7 @@ router.post("/users/:id/delete", requireAdminAuth, async (req, res) => {
 
 // Gestion des contenus
 const contentsService = require("../services/contents.service");
-const { uploadContentImage } = require("../config/multer.config");
+const { uploadContentImage, optimizeUploadedImage } = require("../config/multer.config");
 
 router.get("/contents", requireAdminAuth, async (req, res, next) => {
   try {
@@ -462,12 +462,12 @@ router.get("/contents", requireAdminAuth, async (req, res, next) => {
 });
 
 // Ajout d'un nouveau contenu (publication, formation, événement, annonce)
-router.post("/contents", requireAdminAuth, (req, res, next) => {
-  uploadContentImage.single("image")(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    }
-
+router.post(
+  "/contents",
+  requireAdminAuth,
+  uploadContentImage.single("image"),
+  optimizeUploadedImage({ maxWidth: 1600, quality: 82 }),
+  async (req, res, next) => {
     try {
       const { title, summary, body, category, status, published_at } = req.body;
 
@@ -507,8 +507,8 @@ router.post("/contents", requireAdminAuth, (req, res, next) => {
     } catch (error) {
       next(error);
     }
-  });
-});
+  }
+);
 
 // Paramètres
 router.get("/settings", requireAdminAuth, async (req, res) => {
@@ -771,28 +771,251 @@ router.get("/appointments", requireAdminAuth, (req, res) => {
   });
 });
 
-// Projets
-router.get("/projects", requireAdminAuth, (req, res) => {
-  res.render("admin_generic", {
-    pageTitle: "Projets - ECICA Admin",
-    user: req.user,
-    activeMenu: "projects",
-    sectionTitle: "Projets & Partenariats",
-    sectionSubtitle: "Gestion des projets industriels et académiques en cours.",
-  });
+// Formations
+const formationsService = require("../services/formations.service");
+const { uploadFormationImage, optimizeUploadedImage: optimizeFormationImage } = require("../config/multer.config");
+
+router.get("/formations", requireAdminAuth, async (req, res, next) => {
+  try {
+    const formations = await formationsService.getAllFormations();
+    res.render("admin_formations", {
+      pageTitle: "Formations - ECICA Admin",
+      user: req.user,
+      activeMenu: "formations",
+      formations,
+      poles: formationsService.POLES,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
-// Demandes
-router.get("/requests", requireAdminAuth, (req, res) => {
-  res.render("admin_generic", {
-    pageTitle: "Demandes - ECICA Admin",
-    user: req.user,
-    activeMenu: "requests",
-    sectionTitle: "Demandes d'inscription & Contacts",
-    sectionSubtitle:
-      "Traitement des dossiers et requêtes reçues via le portail.",
-  });
+// Récupérer une formation par API (pour pré-remplir le formulaire d'édition)
+router.get("/formations/api/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const item = await formationsService.getFormationById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: "Formation introuvable" });
+    }
+    res.json({ success: true, item });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
+
+// Ajouter une nouvelle formation
+router.post(
+  "/formations/add",
+  requireAdminAuth,
+  uploadFormationImage.single("image"),
+  optimizeFormationImage({ maxWidth: 1600, quality: 82 }),
+  async (req, res) => {
+    try {
+      const item = await formationsService.addFormation(req.body, req.file);
+      if (
+        req.xhr ||
+        (req.headers.accept && req.headers.accept.includes("json")) ||
+        req.headers["x-requested-with"] === "SPA"
+      ) {
+        return res.json({ success: true, item, message: "Formation créée avec succès !" });
+      }
+      res.redirect("/admin/formations");
+    } catch (err) {
+      console.error("Erreur création formation :", err);
+      if (
+        req.xhr ||
+        (req.headers.accept && req.headers.accept.includes("json")) ||
+        req.headers["x-requested-with"] === "SPA"
+      ) {
+        return res.status(400).json({ success: false, error: err.message || "Erreur de création." });
+      }
+      res.redirect("/admin/formations?error=" + encodeURIComponent(err.message));
+    }
+  }
+);
+
+// Mettre à jour une formation existante
+router.post(
+  "/formations/edit/:id",
+  requireAdminAuth,
+  uploadFormationImage.single("image"),
+  optimizeFormationImage({ maxWidth: 1600, quality: 82 }),
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+      const item = await formationsService.updateFormation(id, req.body, req.file);
+      if (
+        req.xhr ||
+        (req.headers.accept && req.headers.accept.includes("json")) ||
+        req.headers["x-requested-with"] === "SPA"
+      ) {
+        return res.json({ success: true, item, message: "Formation mise à jour avec succès !" });
+      }
+      res.redirect("/admin/formations");
+    } catch (err) {
+      console.error("Erreur mise à jour formation :", err);
+      if (
+        req.xhr ||
+        (req.headers.accept && req.headers.accept.includes("json")) ||
+        req.headers["x-requested-with"] === "SPA"
+      ) {
+        return res.status(400).json({ success: false, error: err.message || "Erreur de mise à jour." });
+      }
+      res.redirect("/admin/formations?error=" + encodeURIComponent(err.message));
+    }
+  }
+);
+
+// Supprimer une formation
+router.post("/formations/delete/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const removed = await formationsService.deleteFormation(id);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.json({ success: true, item: removed, message: "Formation supprimée avec succès !" });
+    }
+    res.redirect("/admin/formations");
+  } catch (err) {
+    console.error("Erreur suppression formation :", err);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.status(400).json({ success: false, error: err.message || "Erreur lors de la suppression." });
+    }
+    res.redirect("/admin/formations?error=" + encodeURIComponent(err.message));
+  }
+});
+
+// Redirection rétrocompatible /admin/projects -> /admin/formations
+router.get("/projects", requireAdminAuth, (req, res) => {
+  res.redirect(301, "/admin/formations");
+});
+
+// Lois & Règlements (Gestion via /admin/requests et /admin/reglements)
+const reglementsService = require("../services/reglements.service");
+const { uploadReglement } = require("../config/multer.config");
+
+const handleReglementsList = async (req, res, next) => {
+  try {
+    const reglements = await reglementsService.getAllReglements();
+    res.render("admin_reglements", {
+      pageTitle: "Lois & Règlements - ECICA Admin",
+      user: req.user,
+      activeMenu: "requests",
+      reglements,
+      categories: reglementsService.CATEGORIES,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+router.get("/requests", requireAdminAuth, handleReglementsList);
+router.get("/reglements", requireAdminAuth, handleReglementsList);
+
+// API : Détail d'un règlement pour pré-remplir le formulaire d'édition
+const handleGetReglementApi = async (req, res) => {
+  try {
+    const item = await reglementsService.getReglementById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: "Règlement introuvable" });
+    }
+    res.json({ success: true, item });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+router.get("/requests/api/:id", requireAdminAuth, handleGetReglementApi);
+router.get("/reglements/api/:id", requireAdminAuth, handleGetReglementApi);
+
+// POST : Ajouter un règlement avec fichier (Word ou PDF)
+const handleAddReglement = async (req, res) => {
+  try {
+    const item = await reglementsService.addReglement(req.body, req.file);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.json({ success: true, item, message: "Règlement ajouté avec succès !" });
+    }
+    res.redirect("/admin/requests?success=1");
+  } catch (err) {
+    console.error("Erreur création règlement :", err);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.status(400).json({ success: false, error: err.message || "Erreur de création." });
+    }
+    res.redirect("/admin/requests?error=" + encodeURIComponent(err.message));
+  }
+};
+router.post("/requests/add", requireAdminAuth, uploadReglement.single("file"), handleAddReglement);
+router.post("/reglements/add", requireAdminAuth, uploadReglement.single("file"), handleAddReglement);
+
+// POST : Modifier un règlement
+const handleEditReglement = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const item = await reglementsService.updateReglement(id, req.body, req.file);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.json({ success: true, item, message: "Règlement mis à jour avec succès !" });
+    }
+    res.redirect("/admin/requests?success=updated");
+  } catch (err) {
+    console.error("Erreur mise à jour règlement :", err);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.status(400).json({ success: false, error: err.message || "Erreur de mise à jour." });
+    }
+    res.redirect("/admin/requests?error=" + encodeURIComponent(err.message));
+  }
+};
+router.post("/requests/edit/:id", requireAdminAuth, uploadReglement.single("file"), handleEditReglement);
+router.post("/reglements/edit/:id", requireAdminAuth, uploadReglement.single("file"), handleEditReglement);
+
+// POST : Supprimer un règlement
+const handleDeleteReglement = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const removed = await reglementsService.deleteReglement(id);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.json({ success: true, removed, message: "Règlement supprimé avec succès." });
+    }
+    res.redirect("/admin/requests");
+  } catch (err) {
+    console.error("Erreur suppression règlement :", err);
+    if (
+      req.xhr ||
+      (req.headers.accept && req.headers.accept.includes("json")) ||
+      req.headers["x-requested-with"] === "SPA"
+    ) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    res.redirect("/admin/requests?error=" + encodeURIComponent(err.message));
+  }
+};
+router.post("/requests/delete/:id", requireAdminAuth, handleDeleteReglement);
+router.post("/reglements/delete/:id", requireAdminAuth, handleDeleteReglement);
 
 // Déconnexion
 router.get("/logout", (req, res) => {

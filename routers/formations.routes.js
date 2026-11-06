@@ -1,4 +1,5 @@
 const routes = require("express").Router();
+const formationsService = require("../services/formations.service");
 
 // Données détaillées des formations de l'E.C.I.C.A
 const formationsData = {
@@ -311,33 +312,49 @@ routes.get("/SystemeEducatif", (req, res, next) => {
 });
 
 // Route détails de formation par paramètre d'URL (ex: /Formation/detailsFormation/commerce-international)
-routes.get("/detailsFormation/:id", (req, res, next) => {
-  const formationId = req.params.id;
-  const formation = formationsData[formationId] || formationsData["commerce-international"];
-  const otherFormations = Object.values(formationsData).filter((f) => f.id !== formation.id).slice(0, 4);
+routes.get("/detailsFormation/:id", async (req, res, next) => {
+  try {
+    const formationId = req.params.id;
+    const allFormations = await formationsService.getAllFormations();
+    const formation =
+      (await formationsService.getFormationById(formationId)) ||
+      allFormations[0] ||
+      formationsData["commerce-international"];
+    const otherFormations = allFormations.filter((f) => f.id !== formation.id).slice(0, 4);
 
-  res.render("detailsFormation", {
-    canonicalPath: `/Formation/detailsFormation/${formation.id}`,
-    pageTitle: `${formation.title} - Formation ECICA`,
-    metaDescription: `${formation.title} à l'E.C.I.C.A Bamako : programme complet, débouchés, date de rentrée ${formation.date} et inscription.`,
-    formation,
-    otherFormations,
-  });
+    res.render("detailsFormation", {
+      canonicalPath: `/Formation/detailsFormation/${formation.id}`,
+      pageTitle: `${formation.title} - Formation ECICA`,
+      metaDescription: `${formation.title} à l'E.C.I.C.A Bamako : programme complet, débouchés, date de rentrée ${formation.date} et inscription.`,
+      formation,
+      otherFormations,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Route détails de formation par query param ou par défaut (ex: /Formation/detailsFormation?id=commerce-international)
-routes.get("/detailsFormation", (req, res, next) => {
-  const formationId = req.query.id || "commerce-international";
-  const formation = formationsData[formationId] || formationsData["commerce-international"];
-  const otherFormations = Object.values(formationsData).filter((f) => f.id !== formation.id).slice(0, 4);
+routes.get("/detailsFormation", async (req, res, next) => {
+  try {
+    const formationId = req.query.id;
+    const allFormations = await formationsService.getAllFormations();
+    const formation =
+      (formationId ? await formationsService.getFormationById(formationId) : null) ||
+      allFormations[0] ||
+      formationsData["commerce-international"];
+    const otherFormations = allFormations.filter((f) => f.id !== formation.id).slice(0, 4);
 
-  res.render("detailsFormation", {
-    canonicalPath: `/Formation/detailsFormation?id=${formation.id}`,
-    pageTitle: `${formation.title} - Formation ECICA`,
-    metaDescription: `${formation.title} à l'E.C.I.C.A Bamako : programme complet, débouchés, date de rentrée ${formation.date} et inscription.`,
-    formation,
-    otherFormations,
-  });
+    res.render("detailsFormation", {
+      canonicalPath: `/Formation/detailsFormation?id=${formation.id}`,
+      pageTitle: `${formation.title} - Formation ECICA`,
+      metaDescription: `${formation.title} à l'E.C.I.C.A Bamako : programme complet, débouchés, date de rentrée ${formation.date} et inscription.`,
+      formation,
+      otherFormations,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = routes;

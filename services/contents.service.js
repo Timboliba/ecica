@@ -44,6 +44,8 @@ function enrichContent(item) {
   };
 }
 
+let memoryCache = null;
+
 async function readAll() {
   if (!fsSync.existsSync(DATA_FILE)) return [];
   try {
@@ -55,10 +57,14 @@ async function readAll() {
 }
 
 async function getAllContents() {
+  if (memoryCache) {
+    return memoryCache;
+  }
   const list = await readAll();
-  return list
+  memoryCache = list
     .sort((a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt))
     .map(enrichContent);
+  return memoryCache;
 }
 
 async function addContent({ title, summary, body, category, status, publishedAt, image, author, authorRole }) {
@@ -82,7 +88,16 @@ async function addContent({ title, summary, body, category, status, publishedAt,
   }
   const list = await readAll();
   list.push(item);
-  await fs.writeFile(DATA_FILE, JSON.stringify(list, null, 2), "utf-8");
+
+  const content = JSON.stringify(list, null, 2);
+  try {
+    await fs.writeFile(DATA_FILE, content, "utf-8");
+  } catch (err) {
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    await fs.writeFile(DATA_FILE, content, "utf-8");
+  }
+
+  memoryCache = null; // Invalidation du cache
   return enrichContent(item);
 }
 

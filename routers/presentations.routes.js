@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const reglementsService = require("../services/reglements.service");
 
 router.get("/Presentation", (req, res) => {
   res.render("presentation", {
@@ -24,12 +25,18 @@ router.get("/Administration", (req, res) => {
   });
 });
 
-router.get("/lois", (req, res) => {
-  res.render("lois", {
-    canonicalPath: "/presentation/lois",
-    pageTitle: "Textes de Loi - ECICA",
-    metaDescription: "Cadre légal et réglementaire de l'ECICA, école privée à Bamako, Mali.",
-  });
+router.get("/lois", async (req, res, next) => {
+  try {
+    const reglements = await reglementsService.getAllReglements();
+    res.render("lois", {
+      canonicalPath: "/presentation/lois",
+      pageTitle: "Lois & Règlements - ECICA",
+      metaDescription: "Cadre légal, décrets officiels et règlements intérieurs de l'ECICA à Bamako, Mali.",
+      reglements,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get("/historique", (req, res) => {

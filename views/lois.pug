@@ -1,62 +1,35 @@
 extends ./layout.pug
+
 block content 
-    .lois_reglements_container
-        h2(class="bigTittle") Lois et Régléments
-        div(class="text-lois")
-            table(class="table")
-                tbody
-                    tr 
-                        td(style="color:#c93") 
-                            b Textes de Lois
-                        td(style="color:#c93;") 
-                            b Téléchargements
-                    tr 
-                        td Lois 1
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 2
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 3
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 4
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 5
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 6
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 7
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 8
-                        td
-                            P
-                                a(href="") Telechagement 
-                    tr 
-                        td Lois 9
-                        td
-                            P
-                                a(href="") Telechagement
-                    tr 
-                        td Lois 10
-                        td
-                            P
-                                a(href="") Telechagement  
+  .lois_reglements_container(style="max-width: 1080px; margin: 0 auto; padding: 40px 20px;")
+    .lois-header(style="margin-bottom: 30px; text-align: left;")
+      h2.bigTittle(style="margin: 0 0 0px; font-size: 2.1rem; color: #0f172a;") Lois & Règlements
+
+    if reglements && reglements.length
+      .lois-grid(style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 24px;")
+        each r in reglements
+          article.loi-card(style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s;")
+            .loi-top
+              .loi-badge-wrap(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;")
+                span(style=`display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; background: ${r.badgeBg || '#eff6ff'}; color: ${r.badgeColor || '#1e40af'}; border: 1px solid rgba(0,0,0,0.05);`)= r.categoryLabel || "Règlement"
+                if r.fileType === 'pdf'
+                  span(style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;") PDF
+                else
+                  span(style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;") WORD
+              h3(style="margin: 0 0 8px; font-size: 1.05rem; font-weight: 700; color: #1e293b; line-height: 1.35;")= r.title
+              if r.description
+                p(style="margin: 0 0 16px; font-size: 0.85rem; color: #64748b; line-height: 1.5;")= r.description
+
+            .loi-bottom(style="border-top: 1px solid #f1f5f9; padding-top: 14px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between;")
+              span(style="font-size: 0.8rem; color: #94a3b8;")= r.date || "—"
+              if r.downloadUrl && r.downloadUrl !== '#'
+                a.btn-download-loi(href=r.downloadUrl target="_blank" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; background: #2563eb; color: #fff; font-size: 0.825rem; font-weight: 600; text-decoration: none; transition: background 0.15s;")
+                  svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2")
+                    path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+                    polyline(points="7 10 12 15 17 10")
+                    line(x1="12" y1="15" x2="12" y2="3")
+                  span Télécharger
+              else
+                span(style="font-size: 0.8rem; color: #94a3b8; font-style: italic;") Document officiel
+    else
+      p(style="text-align: center; padding: 40px; color: #64748b;") Aucun texte réglementaire disponible pour le moment.

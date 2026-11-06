@@ -1,0 +1,485 @@
+extends ./admin_cpanel.pug
+
+block content
+  .dashboard-container
+    //- TOP HEADER
+    .dashboard-header
+      .greeting-block
+        h2.greeting-title Gestion des Lois & Règlements
+        p.greeting-subtitle Consultez, publiez et gérez les textes réglementaires, décrets et règlements intérieurs de l'E.C.I.C.A (Word et PDF).
+
+      button#btn-admin-add-reglement.date-filter-btn(type="button" style="background: #2563eb; color: #fff; border: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 1px 3px rgba(37,99,235,0.3);")
+        svg(width="16", height="16", viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5")
+          line(x1="12", y1="5", x2="12", y2="19")
+          line(x1="5", y1="12", x2="19", y2="12")
+        span Ajouter un règlement
+
+    //- KPI CARDS
+    .kpi-grid(style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;")
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle.blue
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20")
+              path(d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z")
+          .kpi-info
+            span.kpi-title Total Textes
+            span#kpi-total-reglements.kpi-value= (reglements ? reglements.length : 0)
+        .kpi-trend
+          span.trend-positive Textes réglementaires
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle(style="background: #fef2f2; color: #dc2626;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z")
+              polyline(points="14 2 14 8 20 8")
+              line(x1="16" y1="13" x2="8" y2="13")
+              line(x1="16" y1="17" x2="8" y2="17")
+          .kpi-info
+            span.kpi-title Fichiers PDF
+            span#kpi-pdf-reglements.kpi-value= (reglements ? reglements.filter(r => r.fileType === 'pdf').length : 0)
+        .kpi-trend
+          span.trend-positive Documents PDF
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle(style="background: #eff6ff; color: #2563eb;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z")
+              polyline(points="14 2 14 8 20 8")
+              line(x1="12" y1="18" x2="12" y2="12")
+              line(x1="9" y1="15" x2="15" y2="15")
+          .kpi-info
+            span.kpi-title Fichiers Word
+            span#kpi-word-reglements.kpi-value= (reglements ? reglements.filter(r => r.fileType === 'doc' || r.fileType === 'docx').length : 0)
+        .kpi-trend
+          span.trend-positive Fichiers .docx / .doc
+
+      .kpi-card
+        .kpi-top
+          .kpi-icon-circle(style="background: #fef3c7; color: #b45309;")
+            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              circle(cx="12" cy="12" r="10")
+              polyline(points="12 6 12 12 16 14")
+          .kpi-info
+            span.kpi-title Règlements Intérieurs
+            span#kpi-internes-reglements.kpi-value= (reglements ? reglements.filter(r => r.category === 'reglement-interieur' || r.category === 'texte-officiel').length : 0)
+        .kpi-trend
+          span.trend-positive Règles fondamentales
+
+    //- MAIN CONTAINER
+    .dashboard-card(style="margin-top: 24px; padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: visible;")
+      //- Search & Filters Toolbar
+      .formations-toolbar(style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;")
+        .edt-search-box(style="position: relative; width: 100%;")
+          svg.search-icon(width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none;")
+            circle(cx="11" cy="11" r="8")
+            line(x1="21" y1="21" x2="16.65" y2="16.65")
+          input#admin-reglement-search.search-input(type="text" placeholder="Rechercher un règlement, décret, mot-clé ou titre..." autocomplete="off" style="width: 100%; height: 48px; padding-left: 46px; padding-right: 40px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.925rem; color: #1e293b; background: #fff; outline: none; box-sizing: border-box;")
+          button#admin-btn-clear-reglement-search(type="button" style="display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer;") &times;
+
+        //- Filter tabs
+        .contents-filter-tabs(style="display: flex; gap: 8px; flex-wrap: wrap;")
+          button.cft-tab.reglement-filter-tab.active(type="button" data-filter="all") Tous
+          button.cft-tab.reglement-filter-tab(type="button" data-filter="reglement-interieur") Règlement Intérieur
+          button.cft-tab.reglement-filter-tab(type="button" data-filter="texte-officiel") Lois & Décrets
+          button.cft-tab.reglement-filter-tab(type="button" data-filter="charte-ethique") Chartes
+          button.cft-tab.reglement-filter-tab(type="button" data-filter="note-service") Notes de service
+          button.cft-tab.reglement-filter-tab(type="button" data-filter="pedagogie") Pédagogie
+
+      //- Tableau des règlements
+      .table-responsive(style="overflow-x: auto;")
+        table.custom-table(style="width: 100%; border-collapse: separate; border-spacing: 0; min-width: 780px;")
+          thead
+            tr(style="background: #f8fafc;")
+              th(style="padding: 12px 16px; font-size: 0.775rem; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; border-top-left-radius: 8px;") Texte & Portée
+              th(style="padding: 12px 16px; font-size: 0.775rem; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;") Catégorie
+              th(style="padding: 12px 16px; font-size: 0.775rem; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;") Date d'effet
+              th(style="padding: 12px 16px; font-size: 0.775rem; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;") Fichier attaché
+              th(style="padding: 12px 16px; font-size: 0.775rem; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; text-align: right; border-top-right-radius: 8px;") Actions
+          tbody#admin-reglements-tbody
+            if reglements && reglements.length
+              each r in reglements
+                tr.admin-reglement-row(data-id=r.id, data-category=r.category, style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;")
+                  td(style="padding: 16px; vertical-align: middle;")
+                    .reglement-title-box(style="display: flex; align-items: flex-start; gap: 12px;")
+                      .doc-icon-badge(style="width: 38px; height: 38px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 0.75rem;" class=(r.fileType === 'pdf' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'))
+                        if r.fileType === 'pdf'
+                          span(style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;") PDF
+                        else if r.fileType === 'doc' || r.fileType === 'docx'
+                          span(style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;") DOC
+                        else
+                          span(style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;") DOC
+                      div
+                        h4.reglement-row-title(style="margin: 0; font-size: 0.925rem; font-weight: 600; color: #1e293b;")= r.title
+                        p.reglement-row-desc(style="margin: 3px 0 0; font-size: 0.8rem; color: #64748b; line-height: 1.35; max-width: 440px;")= (r.description && r.description.length > 120 ? r.description.slice(0, 120) + '...' : (r.description || '—'))
+
+                  td(style="padding: 16px; vertical-align: middle;")
+                    span.category-badge(style=`display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.775rem; font-weight: 600; background: ${r.badgeBg || '#eff6ff'}; color: ${r.badgeColor || '#1e40af'}; border: 1px solid rgba(0,0,0,0.05);`)= r.categoryLabel || "Règlement"
+
+                  td(style="padding: 16px; vertical-align: middle; font-size: 0.85rem; color: #475569;")
+                    span.reglement-row-date= r.date || "—"
+
+                  td(style="padding: 16px; vertical-align: middle;")
+                    if r.downloadUrl && r.downloadUrl !== '#'
+                      a.btn-file-download(href=r.downloadUrl target="_blank" download style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; background: #f8fafc; border: 1px solid #e2e8f0; color: #2563eb; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.15s ease;")
+                        svg(width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+                          polyline(points="7 10 12 15 17 10")
+                          line(x1="12" y1="15" x2="12" y2="3")
+                        span= (r.fileSize && r.fileSize !== '—' ? `Télécharger (${r.fileSize})` : 'Télécharger')
+                    else
+                      span(style="font-size: 0.8rem; color: #94a3b8; font-style: italic;") Aucun fichier
+
+                  td(style="padding: 16px; vertical-align: middle; text-align: right;")
+                    .actions-cell(style="display: inline-flex; align-items: center; gap: 6px;")
+                      button.btn-edit-reglement(type="button" data-id=r.id title="Modifier ce texte" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #475569; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s;")
+                        svg(width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          path(d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")
+                          path(d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")
+                      button.btn-delete-reglement(type="button" data-id=r.id data-title=r.title title="Supprimer ce texte" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #fee2e2; background: #fff; color: #ef4444; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s;")
+                        svg(width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                          polyline(points="3 6 5 6 21 6")
+                          path(d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")
+            else
+              tr
+                td(colspan="5" style="text-align: center; padding: 40px; color: #64748b;")
+                  p(style="margin: 0; font-size: 0.95rem;") Aucun texte réglementaire enregistré pour le moment.
+
+  //- MODAL AJOUT DE RÈGLEMENT
+  #admin-modal-add-reglement.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 94vw; max-width: 680px; max-height: 90vh; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        div
+          h3(style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;") Ajouter un texte de loi ou règlement
+          p(style="font-size: 0.775rem; color: #64748b; margin: 2px 0 0;") Soumettez un document officiel sous format PDF ou Word (.doc, .docx).
+        button#admin-modal-add-reglement-close(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+          svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="18" y1="6" x2="6" y2="18")
+            line(x1="6" y1="6" x2="18" y2="18")
+
+      form#admin-form-add-reglement(enctype="multipart/form-data" style="padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; -webkit-overflow-scrolling: touch;")
+        .form-group
+          label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Titre du règlement ou texte de loi *
+          input#add-reglement-title(type="text" name="title" placeholder="Ex: Règlement Intérieur Général de l'E.C.I.C.A" required style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+
+        .form-grid-2(style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;")
+          .form-group
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Catégorie / Nature du texte
+            select#add-reglement-category(name="category" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff; box-sizing: border-box; outline: none;")
+              option(value="reglement-interieur") Règlement Intérieur
+              option(value="texte-officiel") Loi & Décret Ministériel
+              option(value="charte-ethique") Charte & Éthique
+              option(value="note-service") Note de Service & Circulaire
+              option(value="pedagogie") Organisation Pédagogique
+              option(value="autre") Autre Document
+
+          .form-group
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Date d'effet / Publication
+            input#add-reglement-date(type="text" name="date" placeholder="Ex: Rentrée 2026, 15 Octobre 2024..." style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+
+        .form-group
+          label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Description & Objet du document
+          textarea#add-reglement-desc(name="description" rows="3" placeholder="Précisez le champ d'application, les signataires ou l'objectif du texte..." style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit; box-sizing: border-box; outline: none;")
+
+        .form-group(style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; text-align: center;")
+          svg(width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="margin: 0 auto 10px; display: block;")
+            path(d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4")
+            polyline(points="17 8 12 3 7 8")
+            line(x1="12" y1="3" x2="12" y2="15")
+          label(style="display: block; font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 4px; cursor: pointer;") Fichier Word ou PDF *
+          p(style="margin: 0 0 12px; font-size: 0.8rem; color: #64748b;") Formats acceptés : .pdf, .docx, .doc (Taille max: 30 Mo)
+          input#add-reglement-file(type="file" name="file" accept=".pdf,.doc,.docx" required style="display: block; margin: 0 auto; font-size: 0.85rem; color: #475569;")
+
+        .modal-form-actions(style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;")
+          button#admin-btn-cancel-add-reglement(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
+          button#admin-btn-submit-add-reglement(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Enregistrer & Publier
+
+  //- MODAL MODIFICATION DE RÈGLEMENT
+  #admin-modal-edit-reglement.edt-modal(role="dialog" aria-hidden="true" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;")
+    .modal-overlay(style="position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);")
+    .modal-container(style="position: relative; width: 94vw; max-width: 680px; max-height: 90vh; background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 10;")
+      .modal-header(style="display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;")
+        div
+          h3(style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;") Modifier le texte réglementaire
+          p(style="font-size: 0.775rem; color: #64748b; margin: 2px 0 0;") Mettez à jour le titre, la catégorie ou remplacez le fichier attaché.
+        button#admin-modal-edit-reglement-close(type="button" title="Fermer" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;")
+          svg(width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            line(x1="18" y1="6" x2="6" y2="18")
+            line(x1="6" y1="6" x2="18" y2="18")
+
+      form#admin-form-edit-reglement(enctype="multipart/form-data" style="padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; -webkit-overflow-scrolling: touch;")
+        input#edit-reglement-id(type="hidden" name="id")
+
+        .form-group
+          label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Titre du texte de loi ou règlement *
+          input#edit-reglement-title(type="text" name="title" required style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+
+        .form-grid-2(style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;")
+          .form-group
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Catégorie / Nature du texte
+            select#edit-reglement-category(name="category" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff; box-sizing: border-box; outline: none;")
+              option(value="reglement-interieur") Règlement Intérieur
+              option(value="texte-officiel") Loi & Décret Ministériel
+              option(value="charte-ethique") Charte & Éthique
+              option(value="note-service") Note de Service & Circulaire
+              option(value="pedagogie") Organisation Pédagogique
+              option(value="autre") Autre Document
+
+          .form-group
+            label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Date d'effet / Publication
+            input#edit-reglement-date(type="text" name="date" style="width: 100%; height: 42px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; outline: none;")
+
+        .form-group
+          label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;") Description & Objet du document
+          textarea#edit-reglement-desc(name="description" rows="3" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit; box-sizing: border-box; outline: none;")
+
+        .form-group(style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 16px; text-align: center;")
+          label(style="display: block; font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 4px; cursor: pointer;") Remplacer le fichier (Optionnel)
+          p(style="margin: 0 0 10px; font-size: 0.775rem; color: #64748b;") Laissez vide pour conserver le document existant.
+          input#edit-reglement-file(type="file" name="file" accept=".pdf,.doc,.docx" style="display: block; margin: 0 auto; font-size: 0.85rem; color: #475569;")
+
+        .modal-form-actions(style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;")
+          button#admin-btn-cancel-edit-reglement(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
+          button#admin-btn-submit-edit-reglement(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Mettre à jour le texte
+
+  script.
+    (function () {
+      const searchInput = document.getElementById("admin-reglement-search");
+      const btnClearSearch = document.getElementById("admin-btn-clear-reglement-search");
+      const filterTabs = document.querySelectorAll(".reglement-filter-tab");
+      const rows = document.querySelectorAll(".admin-reglement-row");
+      let currentCategory = "all";
+
+      function filterRows() {
+        const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+        if (btnClearSearch) {
+          btnClearSearch.style.display = query ? "block" : "none";
+        }
+
+        let visibleCount = 0;
+        rows.forEach((row) => {
+          const rowCategory = row.getAttribute("data-category") || "autre";
+          const titleEl = row.querySelector(".reglement-row-title");
+          const descEl = row.querySelector(".reglement-row-desc");
+          const text = ((titleEl ? titleEl.textContent : "") + " " + (descEl ? descEl.textContent : "")).toLowerCase();
+
+          const matchesCategory = currentCategory === "all" || rowCategory === currentCategory;
+          const matchesQuery = !query || text.includes(query);
+
+          if (matchesCategory && matchesQuery) {
+            row.style.display = "";
+            visibleCount++;
+          } else {
+            row.style.display = "none";
+          }
+        });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener("input", filterRows);
+      }
+      if (btnClearSearch) {
+        btnClearSearch.addEventListener("click", () => {
+          searchInput.value = "";
+          filterRows();
+          searchInput.focus();
+        });
+      }
+
+      filterTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          filterTabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          currentCategory = tab.getAttribute("data-filter") || "all";
+          filterRows();
+        });
+      });
+
+      // Modales
+      const modalAdd = document.getElementById("admin-modal-add-reglement");
+      const btnOpenAdd = document.getElementById("btn-admin-add-reglement");
+      const btnCloseAdd = document.getElementById("admin-modal-add-reglement-close");
+      const btnCancelAdd = document.getElementById("admin-btn-cancel-add-reglement");
+      const formAdd = document.getElementById("admin-form-add-reglement");
+
+      const modalEdit = document.getElementById("admin-modal-edit-reglement");
+      const btnCloseEdit = document.getElementById("admin-modal-edit-reglement-close");
+      const btnCancelEdit = document.getElementById("admin-btn-cancel-edit-reglement");
+      const formEdit = document.getElementById("admin-form-edit-reglement");
+
+      function openModal(modal) {
+        if (!modal) return;
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal(modal, form = null) {
+        if (!modal) return;
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+        if (form) form.reset();
+      }
+
+      if (btnOpenAdd) {
+        btnOpenAdd.addEventListener("click", () => {
+          openModal(modalAdd);
+          const titleInput = document.getElementById("add-reglement-title");
+          if (titleInput) titleInput.focus();
+        });
+      }
+
+      if (btnCloseAdd) btnCloseAdd.addEventListener("click", () => closeModal(modalAdd, formAdd));
+      if (btnCancelAdd) btnCancelAdd.addEventListener("click", () => closeModal(modalAdd, formAdd));
+      if (modalAdd) {
+        const ov = modalAdd.querySelector(".modal-overlay");
+        if (ov) ov.addEventListener("click", () => closeModal(modalAdd, formAdd));
+      }
+
+      if (btnCloseEdit) btnCloseEdit.addEventListener("click", () => closeModal(modalEdit, formEdit));
+      if (btnCancelEdit) btnCancelEdit.addEventListener("click", () => closeModal(modalEdit, formEdit));
+      if (modalEdit) {
+        const ov = modalEdit.querySelector(".modal-overlay");
+        if (ov) ov.addEventListener("click", () => closeModal(modalEdit, formEdit));
+      }
+
+      // Soumission Ajout
+      if (formAdd && !formAdd.dataset.hasSubmitListener) {
+        formAdd.dataset.hasSubmitListener = "true";
+        let isSubmitting = false;
+
+        formAdd.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (isSubmitting) return;
+          isSubmitting = true;
+
+          const submitBtn = document.getElementById("admin-btn-submit-add-reglement");
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Téléversement en cours...";
+          }
+
+          try {
+            const formData = new FormData(formAdd);
+            const res = await fetch("/admin/requests/add", {
+              method: "POST",
+              body: formData,
+              headers: { "Accept": "application/json" }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+              throw new Error(data.error || "Erreur lors du téléversement du règlement.");
+            }
+
+            closeModal(modalAdd, formAdd);
+            if (typeof window.navigateTo === "function") {
+              await window.navigateTo("/admin/requests", false);
+            } else {
+              window.location.reload();
+            }
+          } catch (err) {
+            alert(err.message || "Erreur de téléversement.");
+          } finally {
+            isSubmitting = false;
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Enregistrer & Publier";
+            }
+          }
+        });
+      }
+
+      // Modifier / Supprimer
+      document.addEventListener("click", async (e) => {
+        const editBtn = e.target.closest(".btn-edit-reglement");
+        if (editBtn) {
+          const id = editBtn.getAttribute("data-id");
+          try {
+            const res = await fetch(`/admin/requests/api/${id}`);
+            const data = await res.json();
+            if (!data.success || !data.item) throw new Error("Document introuvable");
+
+            const item = data.item;
+            document.getElementById("edit-reglement-id").value = item.id;
+            document.getElementById("edit-reglement-title").value = item.title || "";
+            document.getElementById("edit-reglement-category").value = item.category || "autre";
+            document.getElementById("edit-reglement-date").value = item.date || "";
+            document.getElementById("edit-reglement-desc").value = item.description || "";
+            openModal(modalEdit);
+          } catch (err) {
+            alert(err.message || "Erreur lors du chargement du texte.");
+          }
+        }
+
+        const delBtn = e.target.closest(".btn-delete-reglement");
+        if (delBtn) {
+          const id = delBtn.getAttribute("data-id");
+          const title = delBtn.getAttribute("data-title") || "ce document";
+          if (confirm(`Voulez-vous vraiment supprimer définitivement le texte "${title}" ?`)) {
+            try {
+              const res = await fetch(`/admin/requests/delete/${id}`, {
+                method: "POST",
+                headers: { "Accept": "application/json" }
+              });
+              const data = await res.json();
+              if (!res.ok || !data.success) throw new Error(data.error || "Erreur lors de la suppression");
+
+              const row = delBtn.closest(".admin-reglement-row");
+              if (row) row.remove();
+              const kpiTotal = document.getElementById("kpi-total-reglements");
+              if (kpiTotal) kpiTotal.textContent = document.querySelectorAll(".admin-reglement-row").length;
+            } catch (err) {
+              alert(err.message || "Erreur de suppression.");
+            }
+          }
+        }
+      });
+
+      // Soumission Modification
+      if (formEdit && !formEdit.dataset.hasSubmitListener) {
+        formEdit.dataset.hasSubmitListener = "true";
+        let isSubmittingEdit = false;
+
+        formEdit.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (isSubmittingEdit) return;
+          isSubmittingEdit = true;
+
+          const id = document.getElementById("edit-reglement-id").value;
+          const submitBtn = document.getElementById("admin-btn-submit-edit-reglement");
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Mise à jour en cours...";
+          }
+
+          try {
+            const formData = new FormData(formEdit);
+            const res = await fetch(`/admin/requests/edit/${id}`, {
+              method: "POST",
+              body: formData,
+              headers: { "Accept": "application/json" }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || "Erreur de mise à jour");
+
+            closeModal(modalEdit, formEdit);
+            if (typeof window.navigateTo === "function") {
+              await window.navigateTo("/admin/requests", false);
+            } else {
+              window.location.reload();
+            }
+          } catch (err) {
+            alert(err.message || "Erreur lors de la mise à jour.");
+          } finally {
+            isSubmittingEdit = false;
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Mettre à jour le texte";
+            }
+          }
+        });
+      }
+    })();
+

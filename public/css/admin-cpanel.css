@@ -3982,3 +3982,542 @@ body {
   color: var(--text-muted);
   padding: 0 4px;
 }
+
+
+/* ==========================================================================
+   OPTIMISATIONS RESPONSIVES AVANCÉES - MOBILE & TABLETTE (ECICA ADMIN)
+   ========================================================================== */
+
+/* Bloquage du défilement du corps quand le menu mobile est ouvert */
+body.sidebar-locked {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Bouton de fermeture de la barre latérale sur mobile */
+.btn-close-sidebar-mobile {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-close-sidebar-mobile:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Voile d'obscurcissement (Backdrop) pour mobile et tablette */
+.admin-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 19, 43, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none;
+}
+
+.admin-sidebar-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   1. TABLETTE & ÉCRANS MOYENS (<= 1024px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .admin-sidebar-backdrop {
+    display: block;
+  }
+
+  .btn-close-sidebar-mobile {
+    display: flex;
+  }
+
+  .admin-sidebar {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px !important;
+    max-width: 85vw;
+    z-index: 999 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.35);
+  }
+
+  .admin-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .admin-sidebar .brand-text,
+  .admin-sidebar .nav-label,
+  .admin-sidebar .user-info-text {
+    display: flex !important;
+  }
+
+  .btn-collapse-sidebar {
+    display: none !important;
+  }
+
+  .admin-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  .admin-topbar {
+    padding: 0 18px;
+  }
+
+  .btn-toggle-menu {
+    display: inline-flex !important;
+  }
+
+  .topbar-center {
+    max-width: 320px;
+    margin: 0 12px;
+  }
+
+  .dashboard-container {
+    padding: 20px 16px;
+    gap: 18px;
+  }
+
+  /* Grille KPI */
+  .kpi-grid,
+  .contents-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px;
+  }
+
+  /* Grilles 2 colonnes transformées en 1 colonne */
+  .middle-grid,
+  .bottom-grid,
+  .users-workspace-grid,
+  .settings-grid-layout {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  /* Tableaux */
+  .table-responsive,
+  .users-table-wrap,
+  .contents-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .edt-table,
+  .users-custom-table,
+  .contents-table {
+    min-width: 680px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. MOBILES & PETITES TABLETTES (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .topbar-center {
+    display: none !important;
+  }
+
+  .admin-topbar {
+    padding: 0 14px;
+  }
+
+  .page-title {
+    font-size: 1rem;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .greeting-title {
+    font-size: 1.35rem;
+  }
+
+  .greeting-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .date-filter-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  #btn-admin-add-edt,
+  #btn-admin-add-formation,
+  #btn-open-create-content {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 46px !important;
+    font-size: 0.925rem !important;
+    touch-action: manipulation !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Funnel commercial */
+  .funnel-container {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .pipeline-summary-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .pipeline-summary-item {
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+  }
+
+  .pipeline-summary-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* Sources des prospects (Donut) */
+  .donut-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .donut-legend {
+    width: 100%;
+  }
+
+  /* Page Utilisateurs */
+  .users-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .users-search-box {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .users-select-filter {
+    width: 100%;
+  }
+
+  .users-btn-create-primary {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: 4px;
+  }
+
+  .users-pagination-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+  }
+
+  /* Page Contenus */
+  .contents-table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .contents-filter-tabs {
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px;
+  }
+
+  .contents-search-wrap {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  /* Page Paramètres */
+  .settings-profile-layout {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .settings-avatar-col {
+    margin: 0 auto;
+  }
+
+  .settings-tabs-list {
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+
+  /* Formulaires dans les modales */
+  .form-row-2,
+  .settings-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. SMARTPHONES & ÉCRANS ÉTROITS (<= 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .admin-topbar {
+    height: 54px;
+    padding: 0 10px;
+  }
+
+  .topbar-left {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-title {
+    font-size: 0.9rem;
+    max-width: calc(100vw - 160px);
+  }
+
+  .topbar-right {
+    gap: 4px;
+  }
+
+  .tenant-selector-btn span {
+    display: none;
+  }
+
+  .tenant-selector-btn svg {
+    margin: 0;
+  }
+
+  .dashboard-container {
+    padding: 12px 8px;
+    gap: 12px;
+  }
+
+  .kpi-grid,
+  .contents-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .kpi-card,
+  .ck-card {
+    padding: 14px;
+  }
+
+  .funnel-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Dialogues de modales en plein écran sur smartphone */
+  .admin-modal-backdrop {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .admin-modal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin: 0 !important;
+  }
+
+  .admin-modal-header {
+    padding: 14px 16px;
+  }
+
+  .admin-modal-title {
+    font-size: 1.05rem;
+  }
+
+  .admin-modal-body {
+    padding: 14px 16px;
+    max-height: calc(94vh - 120px);
+    overflow-y: auto;
+  }
+
+  .admin-modal-footer {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .admin-modal-footer button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Bannière maquette responsive */
+  .banner-mock-card {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+
+  .banner-mock-left,
+  .banner-mock-right {
+    flex: 1 1 100% !important;
+    padding: 14px !important;
+  }
+
+  /* Cartes de sections */
+  .settings-section-card,
+  .contents-section-card,
+  .dashboard-card {
+    padding: 16px !important;
+    border-radius: 10px !important;
+  }
+
+  .users-main-card {
+    border-radius: 10px;
+  }
+
+  /* Modales Emplois du temps sur Mobile / Tablette (Bottom-sheet ergonomique) */
+  .edt-modal {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .edt-modal .modal-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .edt-modal .modal-header {
+    padding: 14px 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .edt-modal form#admin-form-add-edt,
+  .edt-modal form#admin-form-edit-edt {
+    padding: 16px !important;
+    gap: 14px !important;
+    max-height: calc(92vh - 65px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .edt-modal .modal-form-actions {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #fff !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #f1f5f9 !important;
+  }
+
+  .edt-modal .modal-form-actions button {
+    width: 100% !important;
+    min-height: 44px !important;
+    justify-content: center !important;
+    font-size: 0.925rem !important;
+  }
+
+  .file-dropzone#admin-dropzone,
+  .file-dropzone#admin-edit-dropzone {
+    padding: 14px 10px !important;
+    touch-action: manipulation !important;
+  }
+
+  #admin-modal-preview .modal-container {
+    height: 94vh !important;
+    max-height: 94vh !important;
+  }
+}
+
+
+/* Formations Tabs & Form grids */
+.formation-filter-tab {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.formation-filter-tab:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.formation-filter-tab.active {
+  background: #2563eb !important;
+  color: #fff !important;
+  border-color: #2563eb !important;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 768px) {
+  .form-grid-2,
+  .form-grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .formations-toolbar {
+    gap: 10px !important;
+  }
+
+  #admin-modal-add-formation .modal-container,
+  #admin-modal-edit-formation .modal-container {
+    max-height: 94vh !important;
+  }
+}

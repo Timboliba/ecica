@@ -5,7 +5,7 @@ html(lang="fr")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title= pageTitle || "Dashboard Admin"
     link(rel="shortcut icon", href="/img/logo_ecica.webp", type="image/x-icon")
-    link(rel="stylesheet", href="/css/admin-cpanel.css?v=2.2")
+    link(rel="stylesheet", href="/css/admin-cpanel.css?v=2.4")
   body
     .admin-layout
       //- SIDEBAR
@@ -16,6 +16,11 @@ html(lang="fr")
 
           .brand-text
             .brand-title ECI<span>CA</span>
+
+          button#btn-close-sidebar-mobile.btn-close-sidebar-mobile(type="button", aria-label="Fermer le menu")
+            svg(width="20", height="20", viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
+              line(x1="18", y1="6", x2="6", y2="18")
+              line(x1="6", y1="6", x2="18", y2="18")
 
         nav.sidebar-nav
           a.nav-item(href="/admin/cpanel", class=(activeMenu === "dashboard" || !activeMenu ? "active" : ""))
@@ -45,18 +50,18 @@ html(lang="fr")
           //-       line(x1="3", y1="10", x2="21", y2="10")
           //-   span.nav-label Rendez-vous
 
-          a.nav-item(href="/admin/projects", class=(activeMenu === "projects" ? "active" : ""))
+          a.nav-item(href="/admin/formations", class=((activeMenu === "formations" || activeMenu === "projects") ? "active" : ""))
             span.nav-icon
               svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
                 path(d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z")
             span.nav-label Formations
 
-          a.nav-item(href="/admin/requests", class=(activeMenu === "requests" ? "active" : ""))
+          a.nav-item(href="/admin/requests", class=((activeMenu === "requests" || activeMenu === "reglements") ? "active" : ""))
             span.nav-icon
               svg(viewBox="0 0 24 24", fill="none", stroke="currentColor", stroke-width="2")
-                path(d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z")
-                polyline(points="22,6 12,13 2,6")
-            span.nav-label Demandes
+                path(d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20")
+                path(d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z")
+            span.nav-label Lois & Règlements
 
           a.nav-item(href="/admin/contents", class=(activeMenu === "contents" ? "active" : ""))
             span.nav-icon
@@ -108,6 +113,9 @@ html(lang="fr")
               polyline(points="15 18 9 12 15 6")
             span Réduire le menu
 
+      //- BACKDROP OVERLAY MOBILE/TABLETTE
+      #admin-sidebar-backdrop.admin-sidebar-backdrop(aria-hidden="true")
+
       //- MAIN AREA
       main.admin-main
         //- TOP NAVBAR
@@ -122,8 +130,10 @@ html(lang="fr")
               const navTitles = {
                 'dashboard': 'Dashboard',
                 'crm': 'Emploi du temps',
+                'formations': 'Formations',
                 'projects': 'Formations',
-                'requests': 'Demandes',
+                'requests': 'Lois & Règlements',
+                'reglements': 'Lois & Règlements',
                 'contents': 'Contenus',
                 'users': 'Gestion des Utilisateurs',
                 'analytics': 'Analytics',
@@ -162,5 +172,5 @@ html(lang="fr")
         #admin-spa-content.spa-content-area
           block content
 
-    script(src="/javascript/admin-cpanel.js?v=2.2")
+    script(src="/javascript/admin-cpanel.js?v=2.4")
     block scripts

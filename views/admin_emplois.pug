@@ -80,8 +80,8 @@ block content
         button#admin-btn-clear-search(type="button" style="display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer;") &times;
 
       //- Table
-      .table-responsive(style="border: 1px solid #f1f5f9; border-radius: 10px; overflow: visible;")
-        table.edt-table(style="width: 100%; border-collapse: collapse; text-align: left;")
+      .table-responsive(style="border: 1px solid #f1f5f9; border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%;")
+        table.edt-table(style="width: 100%; min-width: 620px; border-collapse: collapse; text-align: left;")
           thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
             tr
               th(style="padding: 14px 20px; font-size: 0.8rem; font-weight: 700; color: #475569;") Classe
@@ -280,10 +280,11 @@ block content
           button#admin-btn-cancel-edit(type="button" style="background: #fff; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 16px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Annuler
           button#admin-btn-submit-edit(type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;") Mettre à jour
 
-  script(src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js")
-  script(src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js")
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js" defer)
+  script(src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer)
   script.
-    (function () {
+    window.initAdminEmplois = function () {
+      let fileEditInput = document.getElementById("admin-edit-input-file");
       const palette = ["#2563eb", "#0d9488", "#7c3aed", "#f97316", "#0284c7", "#db2777", "#3730a3", "#16a34a", "#d97706", "#4f46e5"];
 
       const searchInput = document.getElementById("admin-edt-search");
@@ -487,7 +488,10 @@ block content
       }
 
       if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeAdminPreview);
-      modalPreview.querySelector(".modal-overlay").addEventListener("click", closeAdminPreview);
+      if (modalPreview) {
+        const overlay = modalPreview.querySelector(".modal-overlay");
+        if (overlay) overlay.addEventListener("click", closeAdminPreview);
+      }
 
       // Global click handler
       document.addEventListener("click", function (e) {
@@ -607,7 +611,10 @@ block content
 
       if (btnAddClose) btnAddClose.addEventListener("click", closeAdminAdd);
       if (btnCancelAdd) btnCancelAdd.addEventListener("click", closeAdminAdd);
-      modalAdd.querySelector(".modal-overlay").addEventListener("click", closeAdminAdd);
+      if (modalAdd) {
+        const overlay = modalAdd.querySelector(".modal-overlay");
+        if (overlay) overlay.addEventListener("click", closeAdminAdd);
+      }
 
       if (dropzone && fileInput) {
         dropzone.addEventListener("click", () => fileInput.click());
@@ -630,7 +637,7 @@ block content
       const btnCancelEdit = document.getElementById("admin-btn-cancel-edit");
       const formEdit = document.getElementById("admin-form-edit-edt");
       const dropzoneEdit = document.getElementById("admin-edit-dropzone");
-      const fileEditInput = document.getElementById("admin-edit-input-file");
+      fileEditInput = document.getElementById("admin-edit-input-file");
       const fileSelectedEditName = document.getElementById("admin-edit-file-selected-name");
       const btnSubmitEdit = document.getElementById("admin-btn-submit-edit");
 
@@ -645,7 +652,10 @@ block content
 
       if (btnEditClose) btnEditClose.addEventListener("click", closeAdminEdit);
       if (btnCancelEdit) btnCancelEdit.addEventListener("click", closeAdminEdit);
-      if (modalEdit) modalEdit.querySelector(".modal-overlay").addEventListener("click", closeAdminEdit);
+      if (modalEdit) {
+        const overlay = modalEdit.querySelector(".modal-overlay");
+        if (overlay) overlay.addEventListener("click", closeAdminEdit);
+      }
 
       if (dropzoneEdit && fileEditInput) {
         dropzoneEdit.addEventListener("click", () => fileEditInput.click());
@@ -886,4 +896,9 @@ block content
           document.querySelectorAll(".more-dropdown").forEach(d => d.style.display = "none");
         }
       });
-    })();
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", window.initAdminEmplois);
+    } else {
+      window.initAdminEmplois();
+    }
